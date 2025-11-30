@@ -21,7 +21,7 @@ export function Header() {
           <Link href="/canvas" className="transition-colors hover:text-foreground/80 text-foreground/60">Web Editor</Link>
           <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Compilers</Link>
           <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Blog</Link>
-          <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Contact</Link>
+          <Link href="/contact" className="transition-colors hover:text-foreground/80 text-foreground/60">Contact</Link>
         </nav>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
