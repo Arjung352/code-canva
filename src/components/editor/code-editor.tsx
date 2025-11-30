@@ -164,14 +164,14 @@ export default function CodeEditor() {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between border-b">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b">
         <div className="flex items-center gap-2">
             <Code className="h-5 w-5 text-muted-foreground"/>
             <CardTitle className="text-lg font-medium font-sans">app.tsx</CardTitle>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
         <Select value={language} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Select Language" />
             </SelectTrigger>
             <SelectContent>
