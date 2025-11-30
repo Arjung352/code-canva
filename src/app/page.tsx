@@ -1,63 +1,37 @@
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Code, Users, Video, MessageCircle, PlaySquare, Workflow, Terminal, GitBranch } from 'lucide-react';
+import { ArrowRight, Code, Play, Users, Video, MessageCircle, PlaySquare, Workflow, Terminal, GitBranch, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
-const features = [
+const roadmapSteps = [
   {
-    icon: Users,
-    title: 'Auth Service',
-    description: 'Secure and reliable authentication for your users.',
+    step: "01",
+    title: "Create your account",
+    description: "Sign up in seconds with Google, GitHub, or email. Your workspace is ready immediately.",
   },
   {
-    icon: Code,
-    title: 'Code Editor Service',
-    description: 'A real-time collaborative code editor with syntax highlighting.',
+    step: "02",
+    title: "Start or join a session",
+    description: "Create a new coding session or join an existing one with a unique room link.",
   },
   {
-    icon: Video,
-    title: 'Video Conferencing Service',
-    description: 'Integrated video calls to communicate with your team.',
+    step: "03",
+    title: "Code together in real-time",
+    description: "Write code simultaneously, see each other's cursors, and communicate via chat or video.",
   },
   {
-    icon: MessageCircle,
-    title: 'Chat Service',
-    description: 'Instant messaging for quick and easy team communication.',
+    step: "04",
+    title: "Ship with confidence",
+    description: "Test your code instantly, review changes together, and deploy faster than ever.",
   },
-  {
-    icon: PlaySquare,
-    title: 'Compiler/Execution Service',
-    description: 'Run and test your code directly within the environment.',
-  },
-];
-
-const testimonials = [
-    {
-        quote: "Code Canvas has revolutionized the way our team collaborates. The real-time editor and integrated services are a game changer.",
-        name: "Alex Johnson",
-        title: "Lead Developer, Tech Innovators",
-        avatar: "https://picsum.photos/seed/5/100/100"
-    },
-    {
-        quote: "The seamless integration of video, chat, and a powerful code editor makes remote pair programming feel like we're in the same room.",
-        name: "Samantha Lee",
-        title: "Senior Software Engineer, Creative Solutions",
-        avatar: "https://picsum.photos/seed/6/100/100"
-    },
-    {
-        quote: "I was up and running in minutes. The developer experience is top-notch. Highly recommended for any development team.",
-        name: "Michael Chen",
-        title: "CTO, FutureScape",
-        avatar: "https://picsum.photos/seed/7/100/100"
-    }
 ];
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background dark:bg-black dark">
+    <div className="flex min-h-screen flex-col bg-background dark">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center">
           <div className="mr-4 hidden md:flex">
@@ -80,118 +54,89 @@ export default function LandingPage() {
       <main className="flex-1">
         <section className="relative py-20 md:py-32 lg:py-40">
             <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-            <div className="container text-center relative">
-                <div className="mx-auto max-w-4xl">
-                    <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-6xl md:text-7xl">
-                        Build, Collaborate, Ship. <span className="text-primary">Faster.</span>
-                    </h1>
-                    <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                        Code Canvas is an all-in-one collaborative coding environment designed to supercharge your development workflow from concept to deployment.
-                    </p>
-                    <div className="mt-8 flex justify-center gap-4">
-                        <Button size="lg" asChild>
-                            <Link href="/login">
-                                Start Building for Free
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                         <Button size="lg" variant="outline" asChild>
-                            <Link href="#">
-                                Read Docs
-                            </Link>
-                        </Button>
+            <div className="container relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div className="max-w-xl">
+                        <Badge variant="outline" className="mb-4 bg-primary/10 border-primary/50 text-primary">
+                          <span className="relative flex h-2 w-2 mr-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          </span>
+                          Now in public beta
+                        </Badge>
+                        <h1 className="text-5xl font-bold font-headline tracking-tighter sm:text-6xl md:text-7xl">
+                            Code together. <span className="text-primary">Ship faster.</span>
+                        </h1>
+                        <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+                            The real-time collaborative coding platform for modern development teams. Write code, communicate, and build together—all in one place.
+                        </p>
+                        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                            <Button size="lg" asChild>
+                                <Link href="/login">
+                                    Start coding together
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button size="lg" variant="outline" asChild>
+                                <Link href="#">
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Watch demo
+                                </Link>
+                            </Button>
+                        </div>
+                        <div className="mt-8 flex items-center gap-4">
+                            <div className="flex -space-x-2 overflow-hidden">
+                                <Avatar className="inline-block border-2 border-background">
+                                    <AvatarImage src="https://picsum.photos/seed/a/40/40" data-ai-hint="person" />
+                                    <AvatarFallback>A</AvatarFallback>
+                                </Avatar>
+                                <Avatar className="inline-block border-2 border-background">
+                                    <AvatarImage src="https://picsum.photos/seed/b/40/40" data-ai-hint="person" />
+                                    <AvatarFallback>B</AvatarFallback>
+                                </Avatar>
+                                 <Avatar className="inline-block border-2 border-background">
+                                    <AvatarImage src="https://picsum.photos/seed/c/40/40" data-ai-hint="person" />
+                                    <AvatarFallback>C</AvatarFallback>
+                                </Avatar>
+                                 <Avatar className="inline-block border-2 border-background">
+                                    <AvatarImage src="https://picsum.photos/seed/d/40/40" data-ai-hint="person" />
+                                    <AvatarFallback>D</AvatarFallback>
+                                </Avatar>
+                            </div>
+                            <p className="text-sm text-muted-foreground font-medium">10,000+ developers already collaborating</p>
+                        </div>
+                    </div>
+                     <div className="relative h-full min-h-[300px] md:min-h-0">
+                        <Image 
+                            src="https://picsum.photos/seed/8/800/600" 
+                            alt="Code editor with collaboration features"
+                            fill
+                            className="object-cover rounded-xl shadow-2xl shadow-primary/10 border"
+                            data-ai-hint="code editor team"
+                        />
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="features" className="w-full py-16 md:py-24 lg:py-32 bg-secondary/50">
-          <div className="container">
-            <div className="mx-auto mb-12 max-w-3xl text-center">
-              <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl md:text-5xl">All-in-One Development Hub</h2>
-              <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
-                Stop switching between a dozen different tools. Code Canvas brings everything you need under one roof.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
-              {features.map((feature) => (
-                <Card key={feature.title} className="flex flex-col items-center space-y-4 rounded-lg bg-card/50 p-6 text-card-foreground shadow-sm transition-all hover:scale-105 hover:shadow-primary/20">
-                  <div className="rounded-full bg-primary/10 p-3">
-                    <feature.icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold font-headline">{feature.title}</h3>
-                  <p className="text-center text-sm text-muted-foreground">{feature.description}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="how-it-works" className="w-full py-16 md:py-24 lg:py-32">
+        <section id="roadmap" className="w-full py-16 md:py-24 lg:py-32 bg-secondary/50">
             <div className="container">
                 <div className="mx-auto mb-16 max-w-3xl text-center">
-                    <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl md:text-5xl">Get Productive in 3 Simple Steps</h2>
+                    <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl md:text-5xl">Get started in minutes</h2>
                     <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
-                        Go from idea to a fully collaborative workspace in just a few minutes.
+                        From sign-up to shipping code together—it only takes a few simple steps.
                     </p>
                 </div>
-                <div className="grid gap-12 md:grid-cols-3">
-                    <div className="flex flex-col items-center text-center">
-                        <div className="relative mb-6">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                <GitBranch className="h-8 w-8" />
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {roadmapSteps.map((step) => (
+                        <div key={step.step} className="relative flex flex-col items-start p-6 rounded-lg bg-card/50 border border-transparent hover:border-primary/50 hover:bg-card transition-all">
+                           <div className="absolute top-6 right-6 text-6xl font-black text-primary/10 -z-10">{step.step}</div>
+                           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
+                                <CheckCircle2 className="h-6 w-6" />
+                           </div>
+                           <h3 className="text-xl font-bold font-headline mb-2">{step.title}</h3>
+                           <p className="text-muted-foreground text-sm">{step.description}</p>
                         </div>
-                        <h3 className="text-2xl font-bold font-headline mb-2">1. Create Your Project</h3>
-                        <p className="text-muted-foreground">Start a new project or import an existing repository with a single click.</p>
-                    </div>
-                    <div className="flex flex-col items-center text-center">
-                        <div className="relative mb-6">
-                             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                <Users className="h-8 w-8" />
-                            </div>
-                        </div>
-                        <h3 className="text-2xl font-bold font-headline mb-2">2. Invite Your Team</h3>
-                        <p className="text-muted-foreground">Bring your team on board and start collaborating in a shared, real-time environment.</p>
-                    </div>
-                    <div className="flex flex-col items-center text-center">
-                        <div className="relative mb-6">
-                             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                <Terminal className="h-8 w-8" />
-                            </div>
-                        </div>
-                        <h3 className="text-2xl font-bold font-headline mb-2">3. Start Coding</h3>
-                        <p className="text-muted-foreground">Use our powerful editor, run code, and communicate seamlessly to build your next big thing.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="testimonials" className="w-full py-16 md:py-24 lg:py-32 bg-secondary/50">
-            <div className="container">
-                 <div className="mx-auto mb-12 max-w-3xl text-center">
-                    <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-4xl md:text-5xl">Loved by Developers Worldwide</h2>
-                    <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
-                        Don't just take our word for it. Here's what developers are saying about Code Canvas.
-                    </p>
-                </div>
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {testimonials.map((testimonial) => (
-                        <Card key={testimonial.name} className="flex flex-col justify-between bg-card/50">
-                            <CardContent className="pt-6">
-                                <p className="italic text-foreground/90">"{testimonial.quote}"</p>
-                            </CardContent>
-                            <CardHeader className="flex-row items-center gap-4">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarImage src={testimonial.avatar} alt={testimonial.name} data-ai-hint="person portrait"/>
-                                    <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <CardTitle className="text-base font-bold">{testimonial.name}</CardTitle>
-                                    <CardDescription>{testimonial.title}</CardDescription>
-                                </div>
-                            </CardHeader>
-                        </Card>
                     ))}
                 </div>
             </div>
@@ -228,12 +173,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-// Add a new CSS file for the grid pattern if it doesn't exist
-// or add to globals.css
-// e.g. in globals.css
-// .bg-grid-pattern {
-//   background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-//                     linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-//   background-size: 20px 20px;
-// }
