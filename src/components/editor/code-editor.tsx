@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Code, Play, Sparkles } from 'lucide-react';
+import { Bot, Code, Play, Sparkles, Terminal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { explainCode } from '@/ai/flows/code-explanation-on-hover';
 import { getCodeCompletionSuggestions } from '@/ai/flows/code-completion-suggestions';
+import { executeCode } from '@/ai/flows/code-execution';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -22,6 +23,8 @@ const initialCode = `import React from 'react';
 function HelloWorld() {
   // This is a simple React component
   const message = 'Hello, Code Canvas!';
+
+  console.log(message);
 
   return (
     <div className="container">
@@ -40,6 +43,8 @@ export default function CodeEditor() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isExplanationLoading, setIsExplanationLoading] = useState(false);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
+  const [isExecutionLoading, setIsExecutionLoading] = useState(false);
+  const [executionResult, setExecutionResult] = useState('');
   const { toast } = useToast();
 
   const handleExplainCode = async () => {
@@ -75,6 +80,25 @@ export default function CodeEditor() {
       setSuggestions(['Could not fetch suggestions.']);
     } finally {
       setIsSuggestionLoading(false);
+    }
+  };
+
+  const handleRunCode = async () => {
+    setIsExecutionLoading(true);
+    setExecutionResult('');
+    try {
+      const result = await executeCode({ code, language: 'javascript' });
+      setExecutionResult(result.output);
+    } catch (error) {
+      console.error('Error executing code:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to execute code.',
+      });
+      setExecutionResult('An error occurred while running the code.');
+    } finally {
+      setIsExecutionLoading(false);
     }
   };
 
@@ -130,14 +154,14 @@ export default function CodeEditor() {
               </ScrollArea>
             </DialogContent>
           </Dialog>
-          <Button size="sm">
+          <Button size="sm" onClick={handleRunCode} disabled={isExecutionLoading}>
             <Play className="mr-2 h-4 w-4" />
-            Run
+            {isExecutionLoading ? 'Running...' : 'Run'}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-0 relative">
-        <div className="flex h-full font-code text-sm">
+      <CardContent className="flex-1 p-0 relative flex flex-col">
+        <div className="flex h-2/3 font-code text-sm">
           <div className="w-12 select-none bg-muted/50 p-2 text-right text-muted-foreground">
             {Array.from({ length: lineCount }, (_, i) => (
               <div key={i}>{i + 1}</div>
@@ -150,13 +174,13 @@ export default function CodeEditor() {
               spellCheck="false"
               className="absolute inset-0 h-full w-full resize-none border-0 bg-transparent p-2 font-code text-transparent caret-foreground outline-none"
             />
-             <pre className="pointer-events-none h-full w-full p-2">
+             <pre className="pointer-events-none h-full w-full overflow-auto p-2">
                 <code
                     dangerouslySetInnerHTML={{
                     __html: code
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;')
-                        .replace(/(import|from|function|const|return|export|default)/g, '<span class="text-primary font-semibold">$1</span>')
+                        .replace(/(import|from|function|const|return|export|default|console)/g, '<span class="text-primary font-semibold">$1</span>')
                         .replace(/(\/\/.+)/g, '<span class="text-green-600">$1</span>')
                         .replace(/(['"].+['"])/g, '<span class="text-accent-foreground/80">$1</span>'),
                     }}
@@ -164,6 +188,23 @@ export default function CodeEditor() {
             </pre>
           </div>
         </div>
+        {(isExecutionLoading || executionResult) && (
+          <div className="flex-1 border-t">
+            <div className="flex h-full flex-col">
+              <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2">
+                <Terminal className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-lg font-medium font-sans">Output</h3>
+              </div>
+              <ScrollArea className="flex-1 p-4">
+                {isExecutionLoading ? (
+                  <p>Running code...</p>
+                ) : (
+                  <pre className="text-sm font-code">{executionResult}</pre>
+                )}
+              </ScrollArea>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
