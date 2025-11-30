@@ -117,66 +117,65 @@ export default function LandingPage() {
         <section className="relative py-20 md:py-32 lg:py-40">
           <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
           <div className="container relative">
-            <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-              <div className="max-w-xl">
-                <Badge variant="outline" className="mb-4 border-primary/50 bg-primary/10 text-primary">
-                  <span className="relative mr-2 flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/75 opacity-75"></span>
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-                  </span>
-                  Now in public beta
-                </Badge>
-                <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-                  Code together. <span className="text-primary">Ship faster.</span>
-                </h1>
-                <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                  The real-time collaborative coding platform for modern development teams. Write code, communicate, and build together—all in one place.
-                </p>
-                <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <Button size="lg" asChild>
-                    <Link href="/login">
-                      Start coding together
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link href="#">
-                      <Play className="mr-2 h-4 w-4" />
-                      Watch demo
-                    </Link>
-                  </Button>
-                </div>
-                <div className="mt-8 flex items-center gap-4">
-                  <div className="-space-x-2 flex overflow-hidden">
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage src="https://picsum.photos/seed/a/40/40" data-ai-hint="person" />
-                      <AvatarFallback>A</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage src="https://picsum.photos/seed/b/40/40" data-ai-hint="person" />
-                      <AvatarFallback>B</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage src="https://picsum.photos/seed/c/40/40" data-ai-hint="person" />
-                      <AvatarFallback>C</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage src="https://picsum.photos/seed/d/40/40" data-ai-hint="person" />
-                      <AvatarFallback>D</AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">10,000+ developers already collaborating</p>
-                </div>
+            <div className="mx-auto max-w-3xl text-center">
+              <Badge variant="outline" className="mb-4 border-primary/50 bg-primary/10 text-primary">
+                <span className="relative mr-2 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/75 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+                </span>
+                Now in public beta
+              </Badge>
+              <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+                Code together. <span className="text-primary">Ship faster.</span>
+              </h1>
+              <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+                The real-time collaborative coding platform for modern development teams. Write code, communicate, and build together—all in one place.
+              </p>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+                <Button size="lg" asChild>
+                  <Link href="/login">
+                    Start coding together
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="#">
+                    <Play className="mr-2 h-4 w-4" />
+                    Watch demo
+                  </Link>
+                </Button>
               </div>
-              <div className="relative h-full min-h-[300px] md:min-h-0">
-                <Image
-                  src="https://picsum.photos/seed/hero-image/800/600"
-                  alt="Code editor with collaboration features"
-                  fill
-                  className="rounded-xl border object-cover shadow-2xl shadow-primary/10"
-                  data-ai-hint="code editor team"
-                />
+              <div className="mt-8 flex items-center justify-center gap-4">
+                <div className="-space-x-2 flex overflow-hidden">
+                  <Avatar className="inline-block border-2 border-background">
+                    <AvatarImage src="https://picsum.photos/seed/a/40/40" data-ai-hint="person" />
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="inline-block border-2 border-background">
+                    <AvatarImage src="https://picsum.photos/seed/b/40/40" data-ai-hint="person" />
+                    <AvatarFallback>B</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="inline-block border-2 border-background">
+                    <AvatarImage src="https://picsum.photos/seed/c/40/40" data-ai-hint="person" />
+                    <AvatarFallback>C</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="inline-block border-2 border-background">
+                    <AvatarImage src="https://picsum.photos/seed/d/40/40" data-ai-hint="person" />
+                    <AvatarFallback>D</AvatarFallback>
+                  </Avatar>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">10,000+ developers already collaborating</p>
               </div>
+            </div>
+            <div className="relative mt-16 h-full min-h-[300px] md:min-h-0 lg:mt-24">
+              <Image
+                src="https://picsum.photos/seed/hero-image/1200/800"
+                alt="Code editor with collaboration features"
+                width={1200}
+                height={800}
+                className="rounded-xl border object-cover shadow-2xl shadow-primary/10"
+                data-ai-hint="code editor team"
+              />
             </div>
           </div>
         </section>
@@ -189,22 +188,21 @@ export default function LandingPage() {
             </div>
             
             <div className="relative">
-              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border/20" aria-hidden="true"></div>
+              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border/20 md:left-1/2" aria-hidden="true"></div>
               <div className="space-y-16">
                 {roadmapSteps.map((step, index) => (
                   <div key={step.step} className="relative flex items-center justify-center">
-                    <div className={`flex w-full items-center gap-8 lg:gap-16 ${index % 2 === 1 ? 'flex-row-reverse' : ''}`}>
-                      <div className="w-1/2">
-                        <div className="flex flex-col items-start gap-4">
+                    <div className={`flex w-full flex-col items-center gap-8 md:flex-row lg:gap-16 ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+                      <div className="w-full md:w-1/2">
+                        <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
                           <h3 className="font-headline text-2xl font-bold">{step.title}</h3>
                           <p className="text-muted-foreground">{step.description}</p>
                         </div>
                       </div>
-                      <div className="w-1/2"></div>
+                      <div className="w-full md:w-1/2"></div>
                     </div>
                     <div className="absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-background bg-secondary">
                       <step.icon className="h-6 w-6 text-primary" />
-                      <div className="absolute top-1/2 -translate-y-1/2 text-8xl font-bold text-secondary-foreground/5 opacity-50 ${index % 2 === 1 ? '-left-20' : '-right-20'}">{step.step}</div>
                     </div>
                   </div>
                 ))}
@@ -275,7 +273,7 @@ export default function LandingPage() {
       </main>
       <footer className="bg-background border-t border-border/40 text-muted-foreground">
         <div className="container py-12">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 gap-y-8 md:grid-cols-5 md:gap-x-8">
             <div className="md:col-span-2">
                 <Logo className="text-2xl" />
                 <p className="mt-4 text-sm max-w-xs">
@@ -287,41 +285,35 @@ export default function LandingPage() {
                     <Link href="#" className="hover:text-foreground"><DiscordIcon className="h-5 w-5" /></Link>
                 </div>
             </div>
-            <div>
-              <h3 className="font-headline font-semibold text-foreground">Product</h3>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.product.map(link => (
-                  <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-headline font-semibold text-foreground">Resources</h3>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.resources.map(link => (
-                  <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-headline font-semibold text-foreground">Company</h3>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.company.map(link => (
-                  <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-headline font-semibold text-foreground">Legal</h3>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.legal.map(link => (
-                  <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
-                ))}
-              </ul>
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-3">
+              <div>
+                <h3 className="font-headline font-semibold text-foreground">Product</h3>
+                <ul className="mt-4 space-y-2">
+                  {footerLinks.product.map(link => (
+                    <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-headline font-semibold text-foreground">Resources</h3>
+                <ul className="mt-4 space-y-2">
+                  {footerLinks.resources.map(link => (
+                    <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-headline font-semibold text-foreground">Company</h3>
+                <ul className="mt-4 space-y-2">
+                  {footerLinks.company.map(link => (
+                    <li key={link.name}><Link href={link.href} className="text-sm hover:text-foreground">{link.name}</Link></li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-        <div className="container py-6 border-t border-border/40 flex items-center justify-between">
+        <div className="container py-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm">&copy; 2025 Code Canvas. All rights reserved.</p>
           <div className="flex items-center gap-2 text-sm">
             <span className="relative flex h-2 w-2">
