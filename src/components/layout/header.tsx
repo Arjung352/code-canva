@@ -38,7 +38,7 @@ export function Header() {
                     <Logo />
                     <nav className="mt-8 flex flex-col space-y-4">
                         {navLinks.map(link => (
-                            <Link key={link.href} href={link.href} className="text-lg font-medium transition-colors hover:text-foreground/80 text-foreground/60">{link.label}</Link>
+                            <Link key={link.label} href={link.href} className="text-lg font-medium transition-colors hover:text-foreground/80 text-foreground/60">{link.label}</Link>
                         ))}
                     </nav>
                 </SheetContent>
@@ -49,7 +49,7 @@ export function Header() {
             <div className="w-full flex-1 md:w-auto md:flex-none">
                 <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
                     {navLinks.map(link => (
-                        <Link key={link.href} href={link.href} className="transition-colors hover:text-foreground/80 text-foreground/60">{link.label}</Link>
+                        <Link key={link.label} href={link.href} className="transition-colors hover:text-foreground/80 text-foreground/60">{link.label}</Link>
                     ))}
                 </nav>
             </div>
