@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bot, Code, Play, Sparkles, Terminal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,8 @@ import {
     SelectValue,
   } from "@/components/ui/select";
   
-const initialCode = `import React from 'react';
+const codeSnippets = {
+  javascript: `import React from 'react';
 
 function HelloWorld() {
   // This is a simple React component
@@ -42,7 +43,44 @@ function HelloWorld() {
 }
 
 export default HelloWorld;
-`;
+`,
+  python: `def greet(name):
+    # This is a simple Python function
+    message = f"Hello, {name}!"
+    print(message)
+    return message
+
+greet("Code Canvas")
+`,
+  typescript: `import React from 'react';
+
+type Props = {
+  message: string;
+};
+
+function HelloWorld({ message }: Props): React.ReactElement {
+  // This is a simple TypeScript React component
+  console.log(message);
+
+  return (
+    <div className="container">
+      <h1>{message}</h1>
+      <p>Welcome to your collaborative coding environment.</p>
+    </div>
+  );
+}
+
+export default HelloWorld;
+`,
+  java: `public class HelloWorld {
+    // This is a simple Java class
+    public static void main(String[] args) {
+        String message = "Hello, Code Canvas!";
+        System.out.println(message);
+    }
+}
+`,
+};
 
 const languages = [
     { value: 'javascript', label: 'JavaScript' },
@@ -52,8 +90,8 @@ const languages = [
 ];
 
 export default function CodeEditor() {
-  const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState('javascript');
+  const [code, setCode] = useState(codeSnippets[language as keyof typeof codeSnippets]);
   const [explanation, setExplanation] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isExplanationLoading, setIsExplanationLoading] = useState(false);
@@ -61,6 +99,11 @@ export default function CodeEditor() {
   const [isExecutionLoading, setIsExecutionLoading] = useState(false);
   const [executionResult, setExecutionResult] = useState('');
   const { toast } = useToast();
+
+  const handleLanguageChange = (selectedLanguage: string) => {
+    setLanguage(selectedLanguage);
+    setCode(codeSnippets[selectedLanguage as keyof typeof codeSnippets]);
+  };
 
   const handleExplainCode = async () => {
     setIsExplanationLoading(true);
@@ -127,7 +170,7 @@ export default function CodeEditor() {
             <CardTitle className="text-lg font-medium font-sans">app.tsx</CardTitle>
         </div>
         <div className="flex items-center gap-2">
-        <Select value={language} onValueChange={setLanguage}>
+        <Select value={language} onValueChange={handleLanguageChange}>
             <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Select Language" />
             </SelectTrigger>
@@ -207,8 +250,8 @@ export default function CodeEditor() {
                     __html: code
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;')
-                        .replace(/(import|from|function|const|return|export|default|console)/g, '<span class="text-primary font-semibold">$1</span>')
-                        .replace(/(\/\/.+)/g, '<span class="text-green-600">$1</span>')
+                        .replace(/(import|from|function|const|return|export|default|console|def|class|public|static|void)/g, '<span class="text-primary font-semibold">$1</span>')
+                        .replace(/(\/\/.+)|(#.+)/g, '<span class="text-green-600">$1</span>')
                         .replace(/(['"].+['"])/g, '<span class="text-accent-foreground/80">$1</span>'),
                     }}
                 />
