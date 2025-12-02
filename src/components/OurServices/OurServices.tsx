@@ -15,15 +15,24 @@ const ServicesSection = () => {
       <div className="max-w-6xl w-full mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* LEFT SIDE */}
         <div className="flex flex-col justify-center">
-          <h3 className="text-blue-600 text-xl uppercase font-medium mb-2">
+          <h3
+            className="
+            text-blue-600 text-xl uppercase font-medium mb-2
+          "
+          >
             Platform Features
           </h3>
 
-          <h1 className="text-3xl md:text-4xl font-medium text-gray-100 mb-4">
+          <h1
+            className="
+            text-3xl md:text-4xl font-medium mb-4
+            text-gray-800 dark:text-gray-100
+          "
+          >
             A Powerful Collaborative IDE Built for Teams
           </h1>
 
-          <p className="text-gray-300 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             Work together in real time, deploy instantly, and code from
             anywhere. Our cloud-powered IDE helps teams build, test, and ship
             faster with seamless collaboration and smart development tools.
@@ -31,57 +40,47 @@ const ServicesSection = () => {
 
           <button
             onClick={redirect}
-            className="
-              max-md:self-center
-              text-lg text-white font-bold py-2 px-4 rounded-full w-40
-              transition-all duration-300
-              bg-white/10 
-              backdrop-blur-xl 
-              border border-white/20
-              shadow-lg 
-              hover:bg-white/15
-            "
+            className=" max-md:self-center text-lg text-black font-bold py-2 px-4 rounded-full w-40 transition-all duration-300 bg-white/10 backdrop-blur-xl border border-white/20 shadow-sm shadow-black hover:bg-white/15 dark:text-white dark:shadow-white"
           >
+            {" "}
             Contact Us
           </button>
         </div>
 
-        {/* RIGHT SIDE — SERVICE CARDS */}
+        {/* RIGHT SIDE — CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Real-time Collaboration */}
           <div
             className="
-            p-6 rounded-xl shadow-lg flex flex-col items-center transition-all hover:scale-105
-            bg-white/10 
-            hover:bg-white/15
-            border border-white/20 
+            p-6 rounded-xl flex flex-col items-center transition-all hover:scale-105
+            bg-white border border-gray-200 shadow-md hover:shadow-xl
+            dark:bg-white/10 dark:border-white/10 dark:shadow-lg dark:hover:bg-white/20
             backdrop-blur-xl
           "
           >
             <Users className="w-12 h-12 text-blue-500 mb-4" />
-            <h4 className="font-bold text-lg text-gray-200 mb-2">
+            <h4 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
               Real-time Collaboration
             </h4>
-            <p className="text-gray-300 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-center">
               Edit code together instantly with live cursors and synced changes.
             </p>
           </div>
 
-          {/* Cloud Workspace */}
+          {/* Cloud Workspaces */}
           <div
             className="
-            p-6 rounded-xl shadow-lg flex flex-col items-center transition-all hover:scale-105
-            bg-white/10 
-            hover:bg-white/15
-            border border-white/20 
+            p-6 rounded-xl flex flex-col items-center transition-all hover:scale-105
+            bg-white border border-gray-200 shadow-md hover:shadow-xl
+            dark:bg-white/10 dark:border-white/10 dark:shadow-lg dark:hover:bg-white/20
             backdrop-blur-xl
           "
           >
             <Cloud className="w-12 h-12 text-blue-500 mb-4" />
-            <h4 className="font-bold text-lg text-gray-200 mb-2">
+            <h4 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
               Cloud Workspaces
             </h4>
-            <p className="text-gray-300 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-center">
               Spin up environments instantly — no installs, no setup needed.
             </p>
           </div>
@@ -89,19 +88,17 @@ const ServicesSection = () => {
           {/* Live Preview */}
           <div
             className="
-            p-6 rounded-xl shadow-lg flex flex-col items-center transition-all hover:scale-105
-            bg-white/10 
-                        hover:bg-white/15
-
-            border border-white/20 
+            p-6 rounded-xl flex flex-col items-center transition-all hover:scale-105
+            bg-white border border-gray-200 shadow-md hover:shadow-xl
+            dark:bg-white/10 dark:border-white/10 dark:shadow-lg dark:hover:bg-white/20
             backdrop-blur-xl
           "
           >
             <MonitorPlay className="w-12 h-12 text-blue-500 mb-4" />
-            <h4 className="font-bold text-lg text-gray-200 mb-2">
+            <h4 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
               Live Preview
             </h4>
-            <p className="text-gray-300 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-center">
               Preview code instantly with auto refresh and built-in server.
             </p>
           </div>
@@ -109,18 +106,17 @@ const ServicesSection = () => {
           {/* Smart Code Editor */}
           <div
             className="
-            p-6 rounded-xl shadow-lg flex flex-col items-center transition-all hover:scale-105
-            bg-white/10 
-          hover:bg-white/15
-            border border-white/20 
+            p-6 rounded-xl flex flex-col items-center transition-all hover:scale-105
+            bg-white border border-gray-200 shadow-md hover:shadow-xl
+            dark:bg-white/10 dark:border-white/10 dark:shadow-lg dark:hover:bg-white/20
             backdrop-blur-xl
           "
           >
             <Code2 className="w-12 h-12 text-blue-500 mb-4" />
-            <h4 className="font-bold text-lg text-gray-200 mb-2">
+            <h4 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
               Smart Code Editor
             </h4>
-            <p className="text-gray-300 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-center">
               AI-powered suggestions, syntax highlighting & debugging tools.
             </p>
           </div>

@@ -59,7 +59,7 @@ export default function LandingPage() {
       <Spotlight />
       <main className="flex-1">
         <div className="relative mx-auto my-10 flex max-w-7xl flex-col items-center justify-center">
-          <div>
+          <div className="pb-10">
             {/* LEFT BORDER */}
             <div className="absolute inset-y-0 left-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
               {/* Top */}
