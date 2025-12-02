@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
 import {
   ArrowRight,
   Code,
@@ -8,7 +9,8 @@ import {
   UserPlus,
   Play,
 } from "lucide-react";
-import Image from "next/image";
+
+import { motion } from "motion/react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +18,8 @@ import { Header } from "@/components/layout/header";
 import CodeEditor from "@/components/editor/code-editor";
 import Footer from "@/components/Footer/Footer";
 import { AnimatedTestimonialsDemo } from "@/components/Testimonals/Testimonials";
+import ServicesSection from "@/components/OurServices/OurServices";
+import { Spotlight } from "@/components/ui/spotlight-new";
 
 const roadmapSteps = [
   {
@@ -52,12 +56,93 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
+      <Spotlight />
       <main className="flex-1">
-        <section className="relative py-20 md:py-32 lg:py-40">
-          <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-          <div className="container relative">
-            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-              <div className="max-w-3xl text-center lg:text-left">
+        <div className="relative mx-auto my-10 flex max-w-7xl flex-col items-center justify-center">
+          <div>
+            {/* LEFT BORDER */}
+            <div className="absolute inset-y-0 left-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
+              {/* Top */}
+              <div className="absolute top-0 h-40 w-px bg-gradient-to-b from-transparent via-blue-500 to-transparent" />
+
+              {/* Middle */}
+              <div className="absolute top-1/2 -translate-y-1/2 h-32 w-px bg-gradient-to-b from-transparent via-blue-500 to-transparent" />
+
+              {/* Bottom */}
+              <div className="absolute bottom-0 h-40 w-px bg-gradient-to-t from-transparent via-blue-500 to-transparent" />
+            </div>
+
+            {/* RIGHT BORDER */}
+            <div className="absolute inset-y-0 right-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
+              {/* Top */}
+              <div className="absolute top-0 h-40 w-px bg-gradient-to-b from-transparent via-blue-500 to-transparent" />
+
+              {/* Middle */}
+              <div className="absolute top-1/2 -translate-y-1/2 h-32 w-px bg-gradient-to-b from-transparent via-blue-500 to-transparent" />
+
+              {/* Bottom */}
+              <div className="absolute bottom-0 h-40 w-px bg-gradient-to-t from-transparent via-blue-500 to-transparent" />
+            </div>
+
+            {/* TOP BORDER */}
+            <div className="absolute inset-x-0 top-0 h-px w-full bg-neutral-200/80 dark:bg-neutral-800/80">
+              {/* Left */}
+              <div className="absolute left-0 h-px w-40 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+
+              {/* Center */}
+              <div className="absolute left-1/2 -translate-x-1/2 h-px w-40 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+
+              {/* Right */}
+              <div className="absolute right-0 h-px w-40 bg-gradient-to-l from-transparent via-blue-500 to-transparent" />
+            </div>
+
+            {/* BOTTOM BORDER */}
+            <div className="absolute inset-x-0 bottom-0 h-px w-full bg-neutral-200/80 dark:bg-neutral-800/80">
+              {/* Left */}
+              <div className="absolute left-0 h-px w-40 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+
+              {/* Center */}
+              <div className="absolute left-1/2 -translate-x-1/2 h-px w-40 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+
+              {/* Right */}
+              <div className="absolute right-0 h-px w-40 bg-gradient-to-l from-transparent via-blue-500 to-transparent" />
+            </div>
+            <div className="px-4 py-10 md:py-20">
+              <h1 className="relative z-10 mx-auto max-w-4xl text-center text-2xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
+                {"Code together. Ship faster.".split(" ").map((word, index) => (
+                  <motion.span
+                    key={index}
+                    initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: index * 0.1,
+                      ease: "easeInOut",
+                    }}
+                    className="mr-2 inline-block"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </h1>
+              <motion.p
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 0.3,
+                  delay: 0.8,
+                }}
+                className="relative z-10 mx-auto max-w-xl py-4 text-center text-lg font-normal text-neutral-600 dark:text-neutral-400"
+              >
+                The real-time collaborative coding platform for modern
+                development teams. Write code, communicate, and build
+                together—all in one place.
+              </motion.p>
+              <div className="w-full flex justify-center mt-3">
                 <Badge
                   variant="outline"
                   className="mb-4 border-primary/50 bg-primary/10 text-primary"
@@ -68,172 +153,175 @@ export default function LandingPage() {
                   </span>
                   Now in public beta
                 </Badge>
-                <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-                  Code together.{" "}
-                  <span className="text-primary">Ship faster.</span>
-                </h1>
-                <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-                  The real-time collaborative coding platform for modern
-                  development teams. Write code, communicate, and build
-                  together—all in one place.
-                </p>
-                <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                  <Button size="lg" asChild>
-                    <Link href="/login">
-                      Start coding together
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link href="#">
-                      <Play className="mr-2 h-4 w-4" />
-                      Watch demo
-                    </Link>
-                  </Button>
-                </div>
-                <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
-                  <div className="-space-x-2 flex overflow-hidden">
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage
-                        src="https://picsum.photos/seed/a/40/40"
-                        data-ai-hint="person"
-                      />
-                      <AvatarFallback>A</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage
-                        src="https://picsum.photos/seed/b/40/40"
-                        data-ai-hint="person"
-                      />
-                      <AvatarFallback>B</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage
-                        src="https://picsum.photos/seed/c/40/40"
-                        data-ai-hint="person"
-                      />
-                      <AvatarFallback>C</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="inline-block border-2 border-background">
-                      <AvatarImage
-                        src="https://picsum.photos/seed/d/40/40"
-                        data-ai-hint="person"
-                      />
-                      <AvatarFallback>D</AvatarFallback>
-                    </Avatar>
+              </div>
+              <motion.div
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 0.3,
+                  delay: 1,
+                }}
+                className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
+              >
+                <div className="w-full flex flex-col items-center justify-center">
+                  <div className="flex gap-14">
+                    <button className="w-60 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                      <Link
+                        href="/login"
+                        className=" flex justify-center items-center"
+                      >
+                        Start coding together
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </button>
+                    <button className="w-60 transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
+                      <Link
+                        href="#"
+                        className=" flex justify-center items-center"
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Watch demo
+                      </Link>
+                    </button>
                   </div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    10,000+ developers already collaborating
-                  </p>
+                  <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
+                    <div className="-space-x-2 flex overflow-hidden">
+                      <Avatar className="inline-block border-2 border-background">
+                        <AvatarImage
+                          src="https://picsum.photos/seed/a/40/40"
+                          data-ai-hint="person"
+                        />
+                        <AvatarFallback>A</AvatarFallback>
+                      </Avatar>
+                      <Avatar className="inline-block border-2 border-background">
+                        <AvatarImage
+                          src="https://picsum.photos/seed/b/40/40"
+                          data-ai-hint="person"
+                        />
+                        <AvatarFallback>B</AvatarFallback>
+                      </Avatar>
+                      <Avatar className="inline-block border-2 border-background">
+                        <AvatarImage
+                          src="https://picsum.photos/seed/c/40/40"
+                          data-ai-hint="person"
+                        />
+                        <AvatarFallback>C</AvatarFallback>
+                      </Avatar>
+                      <Avatar className="inline-block border-2 border-background">
+                        <AvatarImage
+                          src="https://picsum.photos/seed/d/40/40"
+                          data-ai-hint="person"
+                        />
+                        <AvatarFallback>D</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      10,000+ developers already collaborating
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="relative h-full lg:mt-0">
-                <Image
-                  src="https://picsum.photos/seed/hero-image/1200/800"
-                  alt="Code editor with collaboration features"
-                  width={1200}
-                  height={800}
-                  className="rounded-xl border object-cover shadow-2xl shadow-primary/10"
-                  data-ai-hint="code editor team"
-                />
-              </div>
+              </motion.div>
             </div>
-          </div>
-        </section>
-        {/* Roadmap */}
-        <section
-          id="roadmap"
-          className="w-full bg-background py-16 md:py-24 lg:py-32"
-        >
-          <div className="container">
-            <div className="mx-auto mb-16 max-w-3xl text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Get started in minutes
-              </h2>
-              <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
-                From sign-up to shipping code together—it only takes a few
-                simple steps.
-              </p>
-            </div>
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 10,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.3,
+                delay: 1.2,
+              }}
+              className="relative z-10 mt-20 rounded-3xl  border-neutral-200 bg-neutral-100 p-4 shadow-md dark:bg-black"
+            >
+              {/* Roadmap */}
+              <section
+                id="roadmap"
+                className="w-full bg-background py-16 md:py-24 lg:py-32"
+              >
+                <div className="container">
+                  <div className="mx-auto mb-16 max-w-3xl text-center">
+                    <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                      Get started in minutes
+                    </h2>
+                    <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
+                      From sign-up to shipping code together—it only takes a few
+                      simple steps.
+                    </p>
+                  </div>
 
-            <div className="relative">
-              <div
-                className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border/20 md:left-1/2"
-                aria-hidden="true"
-              ></div>
-              <div className="space-y-16">
-                {roadmapSteps.map((step, index) => (
-                  <div
-                    key={step.step}
-                    className="relative flex items-center justify-center"
-                  >
+                  <div className="relative">
                     <div
-                      className={`flex w-full flex-col items-center gap-8 md:flex-row lg:gap-16 ${
-                        index % 2 === 1 ? "md:flex-row-reverse" : ""
-                      }`}
-                    >
-                      <div className="w-full md:w-1/2">
-                        <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
-                          <h3 className="font-headline text-2xl font-bold">
-                            {step.title}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            {step.description}
-                          </p>
+                      className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border/20 md:left-1/2"
+                      aria-hidden="true"
+                    ></div>
+                    <div className="space-y-16">
+                      {roadmapSteps.map((step, index) => (
+                        <div
+                          key={step.step}
+                          className="relative flex items-center justify-center"
+                        >
+                          <div
+                            className={`flex w-full flex-col items-center gap-8 md:flex-row lg:gap-16 ${
+                              index % 2 === 1 ? "md:flex-row-reverse" : ""
+                            }`}
+                          >
+                            <div className="w-full md:w-1/2">
+                              <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
+                                <h3 className="font-headline text-2xl font-bold">
+                                  {step.title}
+                                </h3>
+                                <p className="text-muted-foreground">
+                                  {step.description}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="w-full md:w-1/2"></div>
+                          </div>
+                          <div className="absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-background bg-secondary">
+                            <step.icon className="h-6 w-6 text-primary" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-full md:w-1/2"></div>
-                    </div>
-                    <div className="absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-background bg-secondary">
-                      <step.icon className="h-6 w-6 text-primary" />
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+                </div>
+              </section>
 
-        <section id="try-it" className="w-full py-16 md:py-24 lg:py-32">
-          <div className="container">
-            <div className="mx-auto mb-16 max-w-3xl text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Try Code Canvas Now
-              </h2>
-              <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
-                Get a feel for our powerful, real-time editor right here. No
-                sign-up required.
-              </p>
-            </div>
-            <div className="mx-auto max-w-5xl h-[400px] md:h-[600px]">
-              <CodeEditor />
-            </div>
-          </div>
-        </section>
+              <section id="try-it" className="w-full py-16 md:py-24 lg:py-32">
+                <div className="container">
+                  <div className="mx-auto mb-16 max-w-3xl text-center">
+                    <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                      Try Code Canvas Now
+                    </h2>
+                    <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
+                      Get a feel for our powerful, real-time editor right here.
+                      No sign-up required.
+                    </p>
+                  </div>
 
-        <AnimatedTestimonialsDemo />
+                  {/* code editor */}
+                  <div className="mx-auto max-w-5xl h-[400px] md:h-[600px]">
+                    <CodeEditor />
+                  </div>
+                </div>
+              </section>
 
-        <section className="py-24 md:py-32">
-          <div className="container text-center">
-            <div className="mx-auto max-w-3xl">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Ready to Transform Your Workflow?
-              </h2>
-              <p className="mt-6 text-lg text-muted-foreground">
-                Join thousands of developers who are building better software,
-                together. Get started for free, no credit card required.
-              </p>
-              <div className="mt-8">
-                <Button size="lg" asChild>
-                  <Link href="/login">
-                    Sign Up and Start Collaborating
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
+              {/* Testimonials */}
+              <AnimatedTestimonialsDemo />
+
+              {/* Services Section */}
+              <ServicesSection />
+            </motion.div>
           </div>
-        </section>
+        </div>
       </main>
       {/* Footer */}
       <Footer />

@@ -6,7 +6,12 @@ body {
   font-family: var(--font-body), sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-headline), sans-serif;
 }
 
@@ -39,7 +44,7 @@ h1, h2, h3, h4, h5, h6 {
     --radius: 0.5rem;
   }
   .dark {
-    --background: 222 84% 4.9%;
+    --background: 0deg 0% 0%;
     --foreground: 210 40% 98%;
     --card: 222 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -76,7 +81,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-grid-pattern {
-  background-image: linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px),
-                    linear-gradient(to bottom, hsl(var(--border) / 0.1) 1px, transparent 1px);
+  background-image: linear-gradient(
+      to right,
+      hsl(var(--border) / 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, hsl(var(--border) / 0.1) 1px, transparent 1px);
   background-size: 40px 40px;
 }

@@ -145,15 +145,15 @@ export default function CodeEditor() {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b">
+    <Card className="h-full flex flex-col border border-black shadow-xl rounded-xl shadow-gray-900">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b rounded-xl">
         <div className="flex items-center gap-2">
           <Code className="h-5 w-5 text-muted-foreground" />
           <CardTitle className="text-lg font-medium font-sans">
             app.{language === "python" ? "py" : "tsx"}
           </CardTitle>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl">
           <Select value={language} onValueChange={handleLanguageChange}>
             <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Select Language" />
@@ -239,7 +239,7 @@ export default function CodeEditor() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-0 relative flex flex-col overflow-hidden">
+      <CardContent className="flex-1 p-0 relative flex flex-col overflow-hidden rounded-xl">
         <div className="flex-1 font-code text-sm overflow-hidden">
           <Editor
             height="100%"
@@ -249,7 +249,7 @@ export default function CodeEditor() {
             onChange={handleCodeChange}
             options={{
               minimap: { enabled: false },
-              fontSize: 14,
+              fontSize: 17,
               wordWrap: "on",
               scrollBeyondLastLine: false,
             }}
