@@ -1,6 +1,5 @@
-import AppHeader from '@/components/layout/header';
-import AppSidebar from '@/components/layout/app-sidebar';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import AppSidebar from "@/components/layout/app-sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function CanvasLayout({
   children,
@@ -10,7 +9,6 @@ export default function CanvasLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full flex-col">
-        <AppHeader />
         <div className="flex flex-1">
           <AppSidebar />
           <SidebarInset>

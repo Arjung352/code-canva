@@ -1,27 +1,21 @@
-import type {Metadata} from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from "@/components/theme-provider";
+import NavbarWrapper from "@/components/layout/NavbarWrapper";
 
 export const metadata: Metadata = {
-  title: 'Code Canvas',
-  description: 'Real-time collaborative coding and communication platform for development teams.',
+  title: "Code Canvas",
+  description: "Real-time collaborative coding platform.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en">
       <body className="font-body antialiased">
         <ThemeProvider
           attribute="class"
@@ -29,7 +23,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* Client-side navbar */}
+          <NavbarWrapper />
+
+          {/* Page content */}
           {children}
+
           <Toaster />
         </ThemeProvider>
       </body>
