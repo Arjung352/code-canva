@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Code Canvas",
@@ -17,20 +18,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* Client-side navbar */}
-          <NavbarWrapper />
+        <ClerkProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {/* Client-side navbar */}
+            <NavbarWrapper />
 
-          {/* Page content */}
-          {children}
+            {/* Page content */}
+            {children}
 
-          <Toaster />
-        </ThemeProvider>
+            <Toaster />
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
