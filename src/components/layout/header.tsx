@@ -39,12 +39,12 @@ export default function MainNavbar() {
           >
             <ThemeToggle />
           </NavbarButton>
-          <NavbarButton variant="primary">
-            <Link href="/login">Sign In</Link>
+          <NavbarButton variant="primary" href="/signin">
+            Sign In
           </NavbarButton>
 
-          <NavbarButton variant="primary">
-            <Link href="/login">Get Started</Link>
+          <NavbarButton variant="primary" href="/signin">
+            Get Started
           </NavbarButton>
         </div>
       </NavBody>
@@ -76,14 +76,12 @@ export default function MainNavbar() {
             <ThemeToggle />
           </NavbarButton>
 
-          <NavbarButton variant="primary">
-            <Link href="/login">Sign In</Link>
+          <NavbarButton variant="primary" href="/signin">
+            Sign In
           </NavbarButton>
 
-          <NavbarButton variant="primary">
-            <Link href="/login">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+          <NavbarButton variant="primary" href="/signin">
+            Get Started <ArrowRight className="ml-2 h-4 w-4" />
           </NavbarButton>
         </MobileNavMenu>
       </MobileNav>
