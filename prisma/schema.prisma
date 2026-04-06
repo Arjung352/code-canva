@@ -14,4 +14,57 @@ model User {
   avatarUrl    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+   teams        TeamMember[]
+  ownedTeams   Team[]       @relation("TeamOwner")
+}
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  ownerId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  owner     User         @relation("TeamOwner", fields: [ownerId], references: [id])
+  members   TeamMember[]
+  invites TeamInvite[]
+}
+
+model TeamMember {
+  id       String @id @default(uuid())
+  userId   String
+  teamId   String
+  role     Role   @default(MEMBER)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user     User @relation(fields: [userId], references: [id])
+  team     Team @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId]) 
+}
+
+model TeamInvite {
+  id        String   @id @default(uuid())
+  email     String
+  teamId    String
+  role      Role     @default(MEMBER)
+  invitedBy String
+  
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  team      Team @relation(fields: [teamId], references: [id])
+  @@unique([email, teamId]) // prevent duplicate invites
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
 }
