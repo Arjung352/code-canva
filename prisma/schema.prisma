@@ -60,7 +60,7 @@ model TeamInvite {
 
   // Relations
   team      Team @relation(fields: [teamId], references: [id])
-  @@unique([email, teamId]) // prevent duplicate invites
+  @@unique([email, teamId])
 }
 
 enum Role {
