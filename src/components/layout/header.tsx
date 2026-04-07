@@ -7,7 +7,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Navbar,
   NavBody,
-  NavItems,
   MobileNav,
   NavbarLogo,
   NavbarButton,
@@ -15,70 +14,72 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
+import { useUser, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+
 export default function MainNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
 
   const navLinks = [
-    // { link: "/", name: "Home" },
     { link: "/canvas", name: "Web Editor" },
     { link: "/blog", name: "Blog" },
     { link: "/contact", name: "Contact" },
   ];
+
   function TeamsDropdown() {
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node)
+        ) {
+          setOpen(false);
+        }
       }
-    }
 
-    document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    return (
+      <div ref={dropdownRef} className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-sm font-medium hover:text-primary"
+        >
+          Teams ▾
+        </button>
 
-  return (
-    <div ref={dropdownRef} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="text-sm font-medium hover:text-primary"
-      >
-        Teams ▾
-      </button>
+        {open && (
+          <div className="absolute top-full mt-2 left-0 w-48 rounded-xl shadow-lg border bg-background p-2 z-50">
+            <Link
+              href="/teams"
+              className="block px-3 py-2 rounded-lg hover:bg-muted"
+            >
+              Your Teams
+            </Link>
 
-      {open && (
-        <div className="absolute top-full mt-2 left-0 w-48 rounded-xl shadow-lg border bg-background p-2 z-50">
-          <Link
-            href="/teams"
-            className="block px-3 py-2 rounded-lg hover:bg-muted"
-          >
-            Your Teams
-          </Link>
+            <Link
+              href="/teams/create"
+              className="block px-3 py-2 rounded-lg hover:bg-muted"
+            >
+              Create a Team
+            </Link>
+          </div>
+        )}
+      </div>
+    );
+  }
 
-          <Link
-            href="/teams/create"
-            className="block px-3 py-2 rounded-lg hover:bg-muted"
-          >
-            Create a Team
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-}
   return (
     <Navbar>
       <NavBody>
         <NavbarLogo />
-        {/* <NavItems items={navLinks} /> */}
 
         <div className="flex items-center gap-6">
           {navLinks.map((item, idx) => (
@@ -86,16 +87,8 @@ export default function MainNavbar() {
               {item.name}
             </Link>
           ))}
-
           <TeamsDropdown />
         </div>
-
-        {/* <div className="flex flex-col gap-2">
-  <span className="font-semibold">Teams</span>
-  
-  <a href="/teams">Your Teams</a>
-  <a href="/teams/create">Create a Team</a>
-</div> */}
 
         <div className="flex items-center gap-4">
           <NavbarButton
@@ -104,13 +97,27 @@ export default function MainNavbar() {
           >
             <ThemeToggle />
           </NavbarButton>
-          <NavbarButton variant="primary" href="/signin">
-            Sign In
-          </NavbarButton>
 
-          <NavbarButton variant="primary" href="/signin">
-            Get Started
-          </NavbarButton>
+          {/* Auth UI */}
+          {!isLoaded ? (
+            <div className="w-20 h-8 bg-muted rounded animate-pulse" />
+          ) : !isSignedIn ? (
+            <>
+              <NavbarButton variant="primary">
+                <SignInButton mode="modal">
+                  <button>Sign In</button>
+                </SignInButton>
+              </NavbarButton>
+
+              <NavbarButton variant="primary">
+                <SignUpButton mode="modal">
+                  <button>Get Started</button>
+                </SignUpButton>
+              </NavbarButton>
+            </>
+          ) : (
+            <UserButton />
+          )}
         </div>
       </NavBody>
 
@@ -141,13 +148,28 @@ export default function MainNavbar() {
             <ThemeToggle />
           </NavbarButton>
 
-          <NavbarButton variant="primary" href="/signin">
-            Sign In
-          </NavbarButton>
+          {/* Auth UI */}
+          {!isLoaded ? (
+            <div className="h-10 bg-muted rounded animate-pulse" />
+          ) : !isSignedIn ? (
+            <>
+              <NavbarButton variant="primary">
+                <SignInButton mode="modal">
+                  <button>Sign In</button>
+                </SignInButton>
+              </NavbarButton>
 
-          <NavbarButton variant="primary" href="/signin">
-            Get Started <ArrowRight className="ml-2 h-4 w-4" />
-          </NavbarButton>
+              <NavbarButton variant="primary">
+                <SignUpButton mode="modal">
+                  <button className="flex items-center">
+                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                  </button>
+                </SignUpButton>
+              </NavbarButton>
+            </>
+          ) : (
+            <UserButton />
+          )}
         </MobileNavMenu>
       </MobileNav>
     </Navbar>
