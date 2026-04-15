@@ -1,24 +1,61 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CreateTeamPage() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const router = useRouter();
 
   // auto generate slug
   const handleNameChange = (value: string) => {
     setName(value);
-    setSlug(value.toLowerCase().replace(/\s+/g, "-"));
+    setSlug(
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+    );
   };
 
   const handleSubmit = async () => {
-    if (!name) return alert("Team name required");
+    setError("");
 
-    console.log({ name, slug });
+    if (!name) {
+      setError("Team name is required");
+      return;
+    }
 
-    // TODO: API call
-    // await fetch("/api/teams", { method: "POST", body: JSON.stringify({ name, slug }) });
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/teams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, slug }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+        return;
+      }
+
+      // 🚀 Redirect to team page
+      router.push(`/teams/${data.id}`);
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,6 +63,11 @@ export default function CreateTeamPage() {
       <h1 className="text-2xl font-bold mb-6">Create a Team</h1>
 
       <div className="space-y-4">
+        {/* Error */}
+        {error && (
+          <p className="text-red-500 text-sm">{error}</p>
+        )}
+
         {/* Team Name */}
         <div>
           <label className="text-sm">Team Name</label>
@@ -50,9 +92,10 @@ export default function CreateTeamPage() {
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          className="w-full bg-primary text-white py-2 rounded-lg"
+          disabled={loading}
+          className="w-full bg-primary text-white py-2 rounded-lg disabled:opacity-50"
         >
-          Create Team
+          {loading ? "Creating..." : "Create Team"}
         </button>
       </div>
     </div>

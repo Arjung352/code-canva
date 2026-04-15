@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
 export async function DELETE(
   req: Request,
-  { params }: { params: { teamId: string } },
+  { params }: { params: Promise<{ teamId: string }> },
 ) {
   const { userIdToRemove, currentUserId } = await req.json();
+  const { teamId } = await params;
 
   const member = await prisma.teamMember.findUnique({
     where: {
       userId_teamId: {
         userId: currentUserId,
-        teamId: params.teamId,
+        teamId: teamId,
       },
     },
   });
@@ -22,7 +23,7 @@ export async function DELETE(
     where: {
       userId_teamId: {
         userId: userIdToRemove,
-        teamId: params.teamId,
+        teamId: teamId,
       },
     },
   });
@@ -31,10 +32,11 @@ export async function DELETE(
 }
 export async function GET(
   req: Request,
-  { params }: { params: { teamId: string } },
+  { params }: { params: Promise<{ teamId: string }> },
 ) {
+  const { teamId } = await params;
   const members = await prisma.teamMember.findMany({
-    where: { teamId: params.teamId },
+    where: { teamId },
     include: {
       user: true,
     },
