@@ -6,16 +6,15 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String
-  email        String   @unique
-  passwordHash String
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String       @id
+  username   String       @unique
+  email      String       @unique
+  avatarUrl  String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
-   teams        TeamMember[]
-  ownedTeams   Team[]       @relation("TeamOwner")
+  teams      TeamMember[]
+  ownedTeams Team[]       @relation("TeamOwner")
 }
 model Team {
   id        String   @id @default(uuid())
