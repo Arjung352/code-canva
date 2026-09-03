@@ -24,26 +24,16 @@ export async function POST(req: NextRequest) {
           image_url,
           profile_image_url,
           email_addresses,
-          primary_email_address_id,
         } = data;
 
         console.log("Clerk User ID:", id);
         console.log("Email addresses:", email_addresses);
 
-        const client = await clerkClient();
-
-        const clerkUser = await client.users.getUser(id);
-
-        const primaryEmail = clerkUser.emailAddresses.find(
-          (email) => email.id === clerkUser.primaryEmailAddressId,
-        );
-
-        const email = primaryEmail?.emailAddress;
+        const email = data.email_addresses[0].email_address;
 
         if (!email) {
           console.error("No email found for Clerk user:", {
             clerkUserId: id,
-            primaryEmailId: primary_email_address_id,
             emailAddresses: email_addresses,
           });
 
@@ -64,8 +54,16 @@ export async function POST(req: NextRequest) {
           avatarUrl: image_url || profile_image_url || null,
         });
 
-        const user = await prisma.user.create({
-          data: {
+        const user = await prisma.user.upsert({
+          where: {
+            id,
+          },
+          update: {
+            username: finalUsername,
+            email,
+            avatarUrl: image_url || profile_image_url || null,
+          },
+          create: {
             id,
             username: finalUsername,
             email,
@@ -73,7 +71,7 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log("User created successfully:", user.id);
+        console.log("User synced:", user.id);
 
         break;
       }
