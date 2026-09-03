@@ -23,27 +23,13 @@ export async function POST(req: NextRequest) {
           last_name,
           image_url,
           profile_image_url,
-          primary_email_address_id,
           email_addresses,
         } = data;
 
         console.log("Clerk User ID:", id);
         console.log("Email addresses:", email_addresses);
 
-        // Find primary email
-        const primaryEmail = email_addresses?.find(
-          (email) => email.id === primary_email_address_id,
-        );
-
-        if (!primaryEmail) {
-          console.error(`Primary email not found for Clerk user: ${id}`);
-
-          return new Response("Primary email not found", {
-            status: 400,
-          });
-        }
-
-        const email = primaryEmail.email_address;
+        const email = email_addresses[0].email_address;
 
         // Generate username
         const finalUsername =
