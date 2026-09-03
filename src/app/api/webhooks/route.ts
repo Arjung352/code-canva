@@ -7,15 +7,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
+    // Verify that the request actually came from Clerk
     const evt = await verifyWebhook(req);
 
     const { type, data } = evt;
 
     console.log(`Received Clerk webhook: ${type}`);
-    console.log("Webhook payload:", data);
 
     switch (type) {
-      // when new user is created in Clerk, create a new user in the database
       case "user.created": {
         const {
           id,
@@ -28,13 +27,16 @@ export async function POST(req: NextRequest) {
           email_addresses,
         } = data;
 
-        // Find the user's primary email
-        const primaryEmail = email_addresses.find(
+        console.log("Clerk User ID:", id);
+        console.log("Email addresses:", email_addresses);
+
+        // Find primary email
+        const primaryEmail = email_addresses?.find(
           (email) => email.id === primary_email_address_id,
         );
 
         if (!primaryEmail) {
-          console.error("No primary email found for Clerk user:", id);
+          console.error(`Primary email not found for Clerk user: ${id}`);
 
           return new Response("Primary email not found", {
             status: 400,
@@ -43,13 +45,20 @@ export async function POST(req: NextRequest) {
 
         const email = primaryEmail.email_address;
 
-        // Generate a fallback username if Clerk username is null
+        // Generate username
         const finalUsername =
-          username ||
-          `${first_name || ""}${last_name || ""}`.toLowerCase() ||
+          username?.trim() ||
+          `${first_name || ""}${last_name || ""}`.toLowerCase().trim() ||
           email.split("@")[0];
 
-        await prisma.user.create({
+        console.log("Creating user:", {
+          id,
+          username: finalUsername,
+          email,
+          avatarUrl: image_url || profile_image_url || null,
+        });
+
+        const user = await prisma.user.create({
           data: {
             id,
             username: finalUsername,
@@ -58,12 +67,14 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log(`User created in database: ${id}`);
+        console.log("User created successfully:", user.id);
 
         break;
       }
 
-      // when the user is updated in Clerk, update the user in the database
+      // ==========================================
+      // USER UPDATED
+      // ==========================================
       case "user.updated": {
         const {
           id,
@@ -76,12 +87,12 @@ export async function POST(req: NextRequest) {
           email_addresses,
         } = data;
 
-        const primaryEmail = email_addresses.find(
+        const primaryEmail = email_addresses?.find(
           (email) => email.id === primary_email_address_id,
         );
 
         if (!primaryEmail) {
-          console.error("No primary email found for user:", id);
+          console.error(`Primary email not found for Clerk user: ${id}`);
 
           return new Response("Primary email not found", {
             status: 400,
@@ -91,11 +102,11 @@ export async function POST(req: NextRequest) {
         const email = primaryEmail.email_address;
 
         const finalUsername =
-          username ||
-          `${first_name || ""}${last_name || ""}`.toLowerCase() ||
+          username?.trim() ||
+          `${first_name || ""}${last_name || ""}`.toLowerCase().trim() ||
           email.split("@")[0];
 
-        await prisma.user.update({
+        const user = await prisma.user.update({
           where: {
             id,
           },
@@ -106,12 +117,14 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log(`User updated in database: ${id}`);
+        console.log("User updated successfully:", user.id);
 
         break;
       }
 
-      // when the user is deleted in Clerk, delete the user from the database
+      // ==========================================
+      // USER DELETED
+      // ==========================================
       case "user.deleted": {
         const { id } = data;
 
@@ -121,23 +134,27 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log(`User deleted from database: ${id}`);
+        console.log(`User deleted successfully: ${id}`);
 
         break;
       }
 
-      default:
-        console.log(`Unhandled Clerk webhook event: ${type}`);
+      // ==========================================
+      // OTHER EVENTS
+      // ==========================================
+      default: {
+        console.log(`Unhandled Clerk event: ${type}`);
+      }
     }
 
     return new Response("Webhook received", {
       status: 200,
     });
-  } catch (err) {
-    console.error("Error processing Clerk webhook:", err);
+  } catch (error) {
+    console.error("Webhook processing error:", error);
 
-    return new Response("Error processing webhook", {
-      status: 400,
+    return new Response("Webhook processing failed", {
+      status: 500,
     });
   }
 }
