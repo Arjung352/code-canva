@@ -1,6 +1,6 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
+import { clerkClient } from "@clerk/nextjs/server";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -30,11 +30,15 @@ export async function POST(req: NextRequest) {
         console.log("Clerk User ID:", id);
         console.log("Email addresses:", email_addresses);
 
-        const primaryEmail = email_addresses?.find(
-          (email) => email.id === primary_email_address_id,
+        const client = await clerkClient();
+
+        const clerkUser = await client.users.getUser(id);
+
+        const primaryEmail = clerkUser.emailAddresses.find(
+          (email) => email.id === clerkUser.primaryEmailAddressId,
         );
 
-        const email = primaryEmail?.email_address;
+        const email = primaryEmail?.emailAddress;
 
         if (!email) {
           console.error("No email found for Clerk user:", {
