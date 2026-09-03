@@ -24,13 +24,29 @@ export async function POST(req: NextRequest) {
           image_url,
           profile_image_url,
           email_addresses,
+          primary_email_address_id,
         } = data;
 
         console.log("Clerk User ID:", id);
         console.log("Email addresses:", email_addresses);
 
-        const email = email_addresses[0].email_address;
+        const primaryEmail = email_addresses?.find(
+          (email) => email.id === primary_email_address_id,
+        );
 
+        const email = primaryEmail?.email_address;
+
+        if (!email) {
+          console.error("No email found for Clerk user:", {
+            clerkUserId: id,
+            primaryEmailId: primary_email_address_id,
+            emailAddresses: email_addresses,
+          });
+
+          return new Response("User has no email address", {
+            status: 400,
+          });
+        }
         // Generate username
         const finalUsername =
           username?.trim() ||
@@ -69,8 +85,8 @@ export async function POST(req: NextRequest) {
           last_name,
           image_url,
           profile_image_url,
-          primary_email_address_id,
           email_addresses,
+          primary_email_address_id,
         } = data;
 
         const primaryEmail = email_addresses?.find(
