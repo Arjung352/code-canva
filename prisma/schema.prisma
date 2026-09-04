@@ -43,7 +43,7 @@ model TeamMember {
 
   // Relations
   user     User @relation(fields: [userId], references: [id])
-  team     Team @relation(fields: [teamId], references: [id])
+  team     Team @relation(fields: [teamId], references: [id],onDelete: Cascade)
 
   @@unique([userId, teamId]) 
 }
@@ -59,7 +59,7 @@ model TeamInvite {
   createdAt DateTime @default(now())
 
   // Relations
-  team      Team @relation(fields: [teamId], references: [id])
+  team      Team @relation(fields: [teamId], references: [id],onDelete: Cascade)
   @@unique([email, teamId])
 }
 

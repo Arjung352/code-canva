@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+// create a team
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -13,20 +14,6 @@ export async function POST(req: Request) {
     if (!userId || !clerkUser) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Ensure the user exists in the local database
-    const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
-    const username = clerkUser.username ?? clerkUser.firstName ?? "User";
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: { email, username },
-      create: {
-        id: userId,
-        email,
-        username,
-        passwordHash: "clerk_auth", // Required by schema
-      },
-    });
 
     const { name, slug } = await req.json();
 
@@ -67,6 +54,46 @@ export async function POST(req: Request) {
   }
 }
 
+// delete a team
+export async function DELETE(req: Request) {
+  try {
+    const { userId } = await auth();
+
+    console.log("Deleting team, userId:", userId);
+
+    if (!userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { teamId } = await req.json();
+
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      return Response.json({ error: "Team not found" }, { status: 404 });
+    }
+
+    if (team.ownerId !== userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await prisma.team.delete({
+      where: { id: teamId },
+    });
+
+    return Response.json({ message: "Team deleted" });
+  } catch (err) {
+    console.error("Error deleting team:", err);
+    return Response.json(
+      { error: "Something went wrong", details: String(err) },
+      { status: 500 },
+    );
+  }
+}
+
+// get all teams for the current user
 export async function GET(req: Request) {
   try {
     const { userId } = await auth();
