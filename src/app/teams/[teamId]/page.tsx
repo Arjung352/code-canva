@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { TailSpin } from "react-loader-spinner";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Member {
   id: string;
@@ -39,7 +41,10 @@ export default function TeamPage() {
   }, [teamId]);
 
   const handleInvite = async () => {
-    if (!inviteEmail) return;
+    if (!inviteEmail) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     setInviting(true);
     setInviteStatus("");
 
@@ -66,13 +71,29 @@ export default function TeamPage() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading team...</div>;
+    return (
+      <div className=" z-0 w-full h-screen flex justify-center items-center">
+        <TailSpin
+          height="80"
+          width="80"
+          color="#3f66dd"
+          ariaLabel="tail-spin-loading"
+          radius="1"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+        />
+      </div>
+    );
   }
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/teams" className="text-sm text-muted-foreground hover:underline">
+        <Link
+          href="/teams"
+          className="text-sm text-muted-foreground hover:underline"
+        >
           ← Back to Teams
         </Link>
       </div>
@@ -125,13 +146,16 @@ export default function TeamPage() {
         {inviteStatus && (
           <p
             className={`mt-2 text-sm ${
-              inviteStatus.startsWith("Error") ? "text-red-500" : "text-green-600"
+              inviteStatus.startsWith("Error")
+                ? "text-red-500"
+                : "text-green-600"
             }`}
           >
             {inviteStatus}
           </p>
         )}
       </div>
+      <Toaster />
     </div>
   );
 }

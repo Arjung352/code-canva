@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { TailSpin } from "react-loader-spinner";
 
 export default function CreateTeamPage() {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export default function CreateTeamPage() {
         .toLowerCase()
         .trim()
         .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
+        .replace(/[^a-z0-9-]/g, ""),
     );
   };
 
@@ -58,15 +59,29 @@ export default function CreateTeamPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className=" z-0 w-full h-screen flex justify-center items-center">
+        <TailSpin
+          height="80"
+          width="80"
+          color="#3f66dd"
+          ariaLabel="tail-spin-loading"
+          radius="1"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+        />
+      </div>
+    );
+  }
   return (
     <div className="max-w-xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">Create a Team</h1>
 
       <div className="space-y-4">
         {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {/* Team Name */}
         <div>
@@ -95,7 +110,7 @@ export default function CreateTeamPage() {
           disabled={loading}
           className="w-full bg-primary text-white py-2 rounded-lg disabled:opacity-50"
         >
-          {loading ? "Creating..." : "Create Team"}
+          Create Team
         </button>
       </div>
     </div>
