@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+// Fetch the user and their invites from the database
 export async function GET() {
   const { userId } = await auth();
 
@@ -11,7 +12,6 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // get user email from Clerk
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
