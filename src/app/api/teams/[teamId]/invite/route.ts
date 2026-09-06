@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+// invite a user to a team
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ teamId: string }> },

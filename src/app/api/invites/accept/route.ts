@@ -13,21 +13,6 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Ensure the user exists in the local database before adding them to a team
-    const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
-    const username = clerkUser.username ?? clerkUser.firstName ?? "User";
-
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: { email, username },
-      create: {
-        id: userId,
-        email,
-        username,
-        passwordHash: "clerk_auth", // Required by schema
-      },
-    });
-
     const { inviteId } = await req.json();
 
     if (!inviteId) {
@@ -42,7 +27,6 @@ export async function POST(req: Request) {
       return Response.json({ error: "Invite not found" }, { status: 404 });
     }
 
-    // 🔥 Prevent duplicate member crash
     const existingMember = await prisma.teamMember.findUnique({
       where: {
         userId_teamId: {
@@ -56,7 +40,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Already part of team" }, { status: 400 });
     }
 
-    // ✅ Add to team
+    // Add to team
     await prisma.teamMember.create({
       data: {
         userId,
@@ -65,7 +49,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // ✅ Delete invite
+    // Delete invite
     await prisma.teamInvite.delete({
       where: { id: invite.id },
     });
