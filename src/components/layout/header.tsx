@@ -22,7 +22,7 @@ export default function MainNavbar() {
 
   const navLinks = [
     { link: "/canvas", name: "Web Editor" },
-    { link: "/blog", name: "Blog" },
+    { link: "https://blogingdotblog.netlify.app/", name: "Blog" },
     { link: "/contact", name: "Contact" },
   ];
 
@@ -50,7 +50,7 @@ export default function MainNavbar() {
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="text-sm font-medium hover:text-primary"
+          className="text-base font-medium hover:text-primary"
         >
           Teams ▾
         </button>
@@ -81,9 +81,9 @@ export default function MainNavbar() {
       <NavBody>
         <NavbarLogo />
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           {navLinks.map((item, idx) => (
-            <Link key={idx} href={item.link} className="text-sm font-medium">
+            <Link key={idx} href={item.link} className=" text-base font-medium">
               {item.name}
             </Link>
           ))}

@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { ClerkProvider } from "@clerk/nextjs";
+import Footer from "@/components/Footer/Footer";
 
 export const metadata: Metadata = {
   title: "Code Canvas",
@@ -31,6 +32,8 @@ export default function RootLayout({
             {/* Page content */}
             {children}
 
+            {/*  */}
+            <Footer />
             <Toaster />
           </ThemeProvider>
         </ClerkProvider>
