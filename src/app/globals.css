@@ -2,10 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-body), sans-serif;
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 224 71% 4%;
+
+    --glow: 217 91% 60%;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 210 40% 98%;
+
+    --glow: 217 91% 60%;
+  }
 }
 
+body {
+  position: relative;
+  font-family: var(--font-body), sans-serif;
+  overflow-x: hidden;
+  background: hsl(var(--background));
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: -8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(60rem, 80vw);
+  height: 18rem;
+  border-radius: 9999px;
+
+  background: radial-gradient(
+    rgba(59, 130, 246, 0.35) 0%,
+    rgba(37, 99, 235, 0.24) 25%,
+    rgba(30, 64, 175, 0.12) 45%,
+    transparent 72%
+  );
+
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
 h1,
 h2,
 h3,
@@ -81,11 +126,8 @@ h6 {
 }
 
 .bg-grid-pattern {
-  background-image: linear-gradient(
-      to right,
-      hsl(var(--border) / 0.1) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px),
     linear-gradient(to bottom, hsl(var(--border) / 0.1) 1px, transparent 1px);
   background-size: 40px 40px;
 }

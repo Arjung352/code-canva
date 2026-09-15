@@ -60,9 +60,9 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex h-full flex-col ">
       <main className="flex-1">
-        <div className="container py-20 md:py-32 lg:py-40">
+        <div className="container py-16">
           <div className="mx-auto max-w-xl">
             <Card>
               <CardHeader>
