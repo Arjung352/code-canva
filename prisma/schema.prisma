@@ -17,6 +17,14 @@ model User {
 
   teams      TeamMember[]
   ownedTeams Team[]       @relation("TeamOwner")
+
+  projects          ProjectMember[]
+  createdProjects   Project[]          @relation("ProjectCreator")
+  createdMeetings   Meeting[]          @relation("MeetingCreator")
+  meetingRecords    MeetingParticipant[]
+  chatMessages      ChatMessage[]
+  editedDocuments   CodeDocument[]     @relation("DocumentEditor")
+
 }
 model Team {
   id        String   @id @default(uuid())
@@ -31,6 +39,9 @@ model Team {
   owner     User         @relation("TeamOwner", fields: [ownerId], references: [id])
   members   TeamMember[]
   invites TeamInvite[]
+
+    projects Project[]
+
 }
 
 model TeamMember {
@@ -45,8 +56,151 @@ model TeamMember {
   user     User @relation(fields: [userId], references: [id])
   team     Team @relation(fields: [teamId], references: [id],onDelete: Cascade)
 
+    projectMemberships ProjectMember[]
+
+
   @@unique([userId, teamId]) 
 }
+
+
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String
+  description String?
+  teamId      String
+  createdById String
+  isArchived  Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation("ProjectCreator", fields: [createdById], references: [id])
+
+  members     ProjectMember[]
+  documents   CodeDocument[]
+  meetings    Meeting[]
+  chatMessages ChatMessage[]
+
+  @@unique([teamId, slug])
+  @@index([teamId])
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid())
+  projectId String
+  userId    String
+  teamMemberId String
+  role      ProjectRole @default(VIEWER)
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamMember TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@unique([projectId, teamMemberId])
+  @@index([userId])
+}
+
+
+
+model CodeDocument {
+  id          String   @id @default(uuid())
+  projectId   String
+  name        String
+  filePath    String
+  language    String   @default("plaintext")
+
+  // Latest persisted Yjs document state
+  ydocState   Bytes?
+
+  lastEditedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lastEditedBy User?   @relation("DocumentEditor", fields: [lastEditedById], references: [id], onDelete: SetNull)
+  snapshots   CodeDocumentSnapshot[]
+
+  @@unique([projectId, filePath])
+  @@index([projectId])
+}
+
+model CodeDocumentSnapshot {
+  id         String   @id @default(uuid())
+  documentId String
+  content    String   @db.Text
+  version    Int
+  createdAt  DateTime @default(now())
+
+  document   CodeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@index([documentId, createdAt])
+}
+
+
+model Meeting {
+  id          String        @id @default(uuid())
+  projectId   String
+  title       String
+  roomName    String        @unique
+  status      MeetingStatus @default(SCHEDULED)
+
+  startedById String
+  startedAt   DateTime?
+  endedAt     DateTime?
+
+  createdAt   DateTime      @default(now())
+
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  startedBy   User          @relation("MeetingCreator", fields: [startedById], references: [id])
+
+  participants MeetingParticipant[]
+  messages     ChatMessage[]
+
+  @@index([projectId, status])
+}
+
+model MeetingParticipant {
+  id        String   @id @default(uuid())
+  meetingId String
+  userId    String
+
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId, userId])
+  @@index([userId])
+}
+
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  projectId String
+  meetingId String?
+  senderId  String
+  content   String   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  meeting   Meeting? @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([meetingId, createdAt])
+}
+
 
 model TeamInvite {
   id        String   @id @default(uuid())
@@ -67,4 +221,18 @@ enum Role {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum ProjectRole {
+  PROJECT_LEAD
+  DEVELOPER
+  REVIEWER
+  VIEWER
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
 }

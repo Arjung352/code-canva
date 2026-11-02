@@ -13,10 +13,32 @@ import {
   Trash,
 } from "lucide-react";
 
+
+interface TeamMembership {
+  id: string;
+  role: string;
+  team: {
+    id: string;
+    name: string;
+    slug: string;
+    ownerId: string;
+  };
+}
+
+interface TeamInvite {
+  id: string;
+  role: string;
+  team: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
+
 export default function TeamsPage() {
   const { user } = useUser();
-  const [teams, setTeams] = useState<any[]>([]);
-  const [invites, setInvites] = useState<any[]>([]);
+  const [teams, setTeams] = useState<TeamMembership[]>([]);
+  const [invites, setInvites] = useState<TeamInvite[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 🔹 Fetch Teams
@@ -115,7 +137,7 @@ export default function TeamsPage() {
           <h2 className="text-lg font-semibold mb-3">Pending Invitations</h2>
 
           <div className="space-y-3">
-            {invites.map((invite: any) => (
+            {invites.map((invite: TeamInvite) => (
               <div
                 key={invite.id}
                 className="p-4 border rounded-lg flex justify-between items-center"
@@ -142,7 +164,7 @@ export default function TeamsPage() {
       {/* Teams Grid */}
       {teams.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {teams.map((t: any) => (
+          {teams.map((t: TeamMembership) => (
             <div
               key={t.team.id}
               className="

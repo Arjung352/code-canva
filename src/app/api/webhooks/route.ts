@@ -22,8 +22,7 @@ export async function POST(req: NextRequest) {
           first_name,
           last_name,
           image_url,
-          profile_image_url,
-          email_addresses,
+                    email_addresses,
         } = data;
 
         console.log("Clerk User ID:", id);
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
           id,
           username: finalUsername,
           email,
-          avatarUrl: image_url || profile_image_url || null,
+          avatarUrl: image_url || null,
         });
 
         const user = await prisma.user.upsert({
@@ -61,13 +60,13 @@ export async function POST(req: NextRequest) {
           update: {
             username: finalUsername,
             email,
-            avatarUrl: image_url || profile_image_url || null,
+            avatarUrl: image_url || null,
           },
           create: {
             id,
             username: finalUsername,
             email,
-            avatarUrl: image_url || profile_image_url || null,
+            avatarUrl: image_url || null,
           },
         });
 
@@ -86,8 +85,7 @@ export async function POST(req: NextRequest) {
           first_name,
           last_name,
           image_url,
-          profile_image_url,
-          email_addresses,
+                    email_addresses,
           primary_email_address_id,
         } = data;
 
@@ -117,7 +115,7 @@ export async function POST(req: NextRequest) {
           data: {
             username: finalUsername,
             email,
-            avatarUrl: image_url || profile_image_url || null,
+            avatarUrl: image_url || null,
           },
         });
 
