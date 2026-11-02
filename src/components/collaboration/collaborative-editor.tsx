@@ -43,6 +43,7 @@ import { useYjsDocument, Collaborator } from "@/hooks/use-yjs-document";
 import { explainCode } from "@/ai/flows/code-explanation-on-hover";
 import { getCodeCompletionSuggestions } from "@/ai/flows/code-completion-suggestions";
 import { executeCode } from "@/ai/flows/code-execution";
+import { DEFAULT_SNIPPETS } from "@/lib/code-snippets";
 
 interface CollaborativeEditorProps {
   projectId: string;
@@ -58,6 +59,7 @@ interface CollaborativeEditorProps {
     avatarUrl?: string | null;
   } | null;
   onLanguageChange?: (language: string) => void;
+  onCollaboratorsChange?: (collaborators: Collaborator[]) => void;
 }
 
 const languages = [
@@ -81,6 +83,7 @@ export function CollaborativeEditor({
   canEdit,
   currentUser,
   onLanguageChange,
+  onCollaboratorsChange,
 }: CollaborativeEditorProps) {
   const [language, setLanguage] = useState(initialLanguage || "javascript");
   const [editorInstance, setEditorInstance] = useState<any>(null);
@@ -101,6 +104,7 @@ export function CollaborativeEditor({
     collaborators,
     saveStatus,
     connectionStatus,
+    reconnect,
     persistNow,
   } = useYjsDocument({
     projectId,
@@ -110,6 +114,21 @@ export function CollaborativeEditor({
     canEdit,
     currentUser,
   });
+
+  // Track serialized collaborators to avoid triggering parent re-render loops
+  const lastNotifiedCollabsRef = useRef<string>("");
+
+  useEffect(() => {
+    if (onCollaboratorsChange) {
+      const serialized = collaborators
+        .map((c) => `${c.clientId}:${c.user.id}:${c.user.name}`)
+        .join(",");
+      if (lastNotifiedCollabsRef.current !== serialized) {
+        lastNotifiedCollabsRef.current = serialized;
+        onCollaboratorsChange(collaborators);
+      }
+    }
+  }, [collaborators, onCollaboratorsChange]);
 
   // Handle Monaco mount and bind with Yjs
   const handleEditorDidMount: OnMount = (editor) => {
@@ -126,7 +145,7 @@ export function CollaborativeEditor({
           type,
           model,
           new Set([editor]),
-          provider.awareness
+          provider.awareness,
         );
       }
     }
@@ -145,7 +164,7 @@ export function CollaborativeEditor({
           type,
           model,
           new Set([editorInstance]),
-          provider.awareness
+          provider.awareness,
         );
       }
     }
@@ -172,6 +191,24 @@ export function CollaborativeEditor({
     setLanguage(selectedLanguage);
     if (onLanguageChange) {
       onLanguageChange(selectedLanguage);
+    }
+
+    // When changing format (e.g. from js to ts), update sample code if empty or currently a template
+    if (canEdit && ydoc) {
+      const ytext = ydoc.getText("monaco");
+      const currentCode = ytext.toString().trim();
+      const isSampleOrEmpty =
+        !currentCode ||
+        Object.values(DEFAULT_SNIPPETS).some(
+          (snippet) => snippet.trim() === currentCode,
+        );
+
+      if (isSampleOrEmpty && DEFAULT_SNIPPETS[selectedLanguage]) {
+        ydoc.transact(() => {
+          ytext.delete(0, ytext.length);
+          ytext.insert(0, DEFAULT_SNIPPETS[selectedLanguage]);
+        });
+      }
     }
   };
 
@@ -255,7 +292,10 @@ export function CollaborativeEditor({
           </div>
 
           {!canEdit && (
-            <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/30 flex items-center gap-1">
+            <Badge
+              variant="outline"
+              className="text-xs text-amber-500 border-amber-500/30 flex items-center gap-1"
+            >
               <Eye className="h-3 w-3" />
               Read-Only
             </Badge>
@@ -274,10 +314,15 @@ export function CollaborativeEditor({
                 Connecting...
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-muted-foreground">
+              <button
+                type="button"
+                onClick={reconnect}
+                className="flex items-center gap-1 text-rose-500 hover:text-rose-600 font-medium cursor-pointer transition-colors"
+                title="Click to reconnect WebSocket"
+              >
                 <CloudOff className="h-3.5 w-3.5" />
-                Offline
-              </span>
+                Disconnected (Retry)
+              </button>
             )}
 
             <span className="text-muted-foreground">|</span>
@@ -305,7 +350,7 @@ export function CollaborativeEditor({
             <div className="flex items-center -space-x-2 mr-2">
               {collaborators.slice(0, 5).map((collab) => (
                 <div
-                  key={collab.clientId}
+                  key={`collab-${collab.clientId}-${collab.user.id}`}
                   className="relative group"
                   title={`${collab.user.name} (editing)`}
                 >
@@ -313,9 +358,12 @@ export function CollaborativeEditor({
                     className="h-7 w-7 border-2"
                     style={{ borderColor: collab.user.color }}
                   >
-                    {collab.user.avatarUrl && (
-                      <AvatarImage src={collab.user.avatarUrl} alt={collab.user.name} />
-                    )}
+                    {collab.user.avatarUrl ? (
+                      <AvatarImage
+                        src={collab.user.avatarUrl}
+                        alt={collab.user.name}
+                      />
+                    ) : null}
                     <AvatarFallback
                       className="text-[10px] font-bold text-white"
                       style={{ backgroundColor: collab.user.color }}
@@ -340,7 +388,11 @@ export function CollaborativeEditor({
             </SelectTrigger>
             <SelectContent>
               {languages.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-xs">
+                <SelectItem
+                  key={lang.value}
+                  value={lang.value}
+                  className="text-xs"
+                >
                   {lang.label}
                 </SelectItem>
               ))}
@@ -350,7 +402,12 @@ export function CollaborativeEditor({
           {/* AI Explain Code */}
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleExplainCode}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={handleExplainCode}
+              >
                 <Bot className="mr-1.5 h-3.5 w-3.5 text-primary" />
                 Explain
               </Button>
@@ -358,7 +415,9 @@ export function CollaborativeEditor({
             <DialogContent className="sm:max-w-[625px]">
               <DialogHeader>
                 <DialogTitle>Code Explanation</DialogTitle>
-                <DialogDescription>AI-powered analysis of your current code.</DialogDescription>
+                <DialogDescription>
+                  AI-powered analysis of your current code.
+                </DialogDescription>
               </DialogHeader>
               <ScrollArea className="max-h-[60vh] rounded-md border p-4 text-sm leading-relaxed">
                 {isExplanationLoading ? (
@@ -376,7 +435,12 @@ export function CollaborativeEditor({
           {/* AI Suggestions */}
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleGetSuggestions}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={handleGetSuggestions}
+              >
                 <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />
                 Suggest
               </Button>
@@ -384,7 +448,9 @@ export function CollaborativeEditor({
             <DialogContent className="sm:max-w-[625px]">
               <DialogHeader>
                 <DialogTitle>Code Suggestions</DialogTitle>
-                <DialogDescription>AI-powered completions based on your code context.</DialogDescription>
+                <DialogDescription>
+                  AI-powered completions based on your code context.
+                </DialogDescription>
               </DialogHeader>
               <ScrollArea className="max-h-[60vh] rounded-md border p-4">
                 {isSuggestionLoading ? (
@@ -395,7 +461,10 @@ export function CollaborativeEditor({
                 ) : (
                   <ul className="space-y-2">
                     {suggestions.map((s, i) => (
-                      <li key={i} className="rounded bg-secondary p-2.5 font-mono text-xs whitespace-pre-wrap border">
+                      <li
+                        key={i}
+                        className="rounded bg-secondary p-2.5 font-mono text-xs whitespace-pre-wrap border"
+                      >
                         {s}
                       </li>
                     ))}
@@ -458,7 +527,9 @@ export function CollaborativeEditor({
           <div className="border-t max-h-[35%] flex flex-col bg-muted/30">
             <div className="flex items-center gap-2 border-b bg-muted/60 px-4 py-1.5">
               <Terminal className="h-4 w-4 text-primary" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider">Console Output</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider">
+                Console Output
+              </h3>
             </div>
             <ScrollArea className="flex-1 p-4">
               {isExecutionLoading ? (
@@ -478,4 +549,3 @@ export function CollaborativeEditor({
     </Card>
   );
 }
-

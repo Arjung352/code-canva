@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 
@@ -65,15 +65,42 @@ export function useYjsDocument({
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const ydocRef = useRef<Y.Doc | null>(null);
 
+  // In-flight mutex & deduplication refs
+  const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
+  const lastSavedBase64Ref = useRef<string | null>(initialBase64State || null);
+  const lastSavedContentRef = useRef<string | null>(initialTextContent || null);
+
+  // Keep a stable ref for persistState to avoid tearing down the Yjs provider on callback changes
+  const persistStateRef = useRef<(doc: Y.Doc) => Promise<void>>(async () => {});
+
   // Debounced save function to persist document state to PostgreSQL
   const persistState = useCallback(async (doc: Y.Doc) => {
     if (!canEdit) return;
-    setSaveStatus("saving");
-    try {
-      const update = Y.encodeStateAsUpdate(doc);
-      const base64Update = Buffer.from(update).toString("base64");
-      const textContent = doc.getText("monaco").toString();
 
+    // Mutex check: if an autosave is already in-flight, queue a trailing save
+    if (isSavingRef.current) {
+      pendingSaveRef.current = true;
+      return;
+    }
+
+    const textContent = doc.getText("monaco").toString();
+    const update = Y.encodeStateAsUpdate(doc);
+    const base64Update = Buffer.from(update).toString("base64");
+
+    // Deduplication check: if state is identical to last persisted state, avoid network request
+    if (
+      lastSavedBase64Ref.current === base64Update &&
+      lastSavedContentRef.current === textContent
+    ) {
+      setSaveStatus("saved");
+      return;
+    }
+
+    isSavingRef.current = true;
+    setSaveStatus("saving");
+
+    try {
       const res = await fetch(`/api/projects/${projectId}/documents/${documentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -84,6 +111,8 @@ export function useYjsDocument({
       });
 
       if (res.ok) {
+        lastSavedBase64Ref.current = base64Update;
+        lastSavedContentRef.current = textContent;
         setSaveStatus("saved");
       } else {
         setSaveStatus("unsaved");
@@ -91,9 +120,20 @@ export function useYjsDocument({
     } catch (e) {
       console.error("Failed to auto-save document state:", e);
       setSaveStatus("unsaved");
+    } finally {
+      isSavingRef.current = false;
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        persistState(doc);
+      }
     }
   }, [projectId, documentId, canEdit]);
 
+  useEffect(() => {
+    persistStateRef.current = persistState;
+  }, [persistState]);
+
+  // Primary lifecycle: create Y.Doc and WebsocketProvider strictly based on documentId
   useEffect(() => {
     if (!documentId) return;
 
@@ -113,11 +153,11 @@ export function useYjsDocument({
       doc.getText("monaco").insert(0, initialTextContent);
     }
 
-    // Determine WebSocket server URL
+    // Determine WebSocket server URL from environment or current hostname
     const wsUrl =
       process.env.NEXT_PUBLIC_YJS_WEBSOCKET_URL ||
       (typeof window !== "undefined"
-        ? `ws://${window.location.hostname}:1234`
+        ? `ws://${window.location.hostname || "localhost"}:1234`
         : "ws://localhost:1234");
 
     const roomName = `doc-${documentId}`;
@@ -134,47 +174,32 @@ export function useYjsDocument({
         setConnectionStatus(event.status);
       });
 
-      // Set user awareness state
-      if (currentUser && wsProvider.awareness) {
-        const userColor = getRandomColor(currentUser.id);
-        wsProvider.awareness.setLocalStateField("user", {
-          id: currentUser.id,
-          name: currentUser.username,
-          color: userColor,
-          avatarUrl: currentUser.avatarUrl,
-        });
-
-        const updateCollaborators = () => {
-          const states = wsProvider?.awareness.getStates();
-          if (!states) return;
-          const active: Collaborator[] = [];
-          states.forEach((state, clientId) => {
-            if (state.user) {
-              active.push({
-                clientId,
-                user: state.user,
-              });
-            }
-          });
-          setCollaborators(active);
-        };
-
-        wsProvider.awareness.on("change", updateCollaborators);
-        updateCollaborators();
+      // Synchronize initial connection status
+      if (wsProvider.wsconnected) {
+        setConnectionStatus("connected");
+      } else if (wsProvider.wsconnecting) {
+        setConnectionStatus("connecting");
+      } else {
+        setConnectionStatus("disconnected");
       }
     } catch (err) {
-      console.warn("Could not connect to Yjs WebSocket server. Operating in local-sync mode.", err);
+      console.error("Yjs WebSocket provider initialization error:", err);
       setConnectionStatus("disconnected");
     }
 
     // Auto-save on document update
-    const updateHandler = () => {
+    const updateHandler = (_update: Uint8Array, origin: unknown) => {
+      // Avoid triggering an auto-save storm when remote updates are received via WebSocket
+      if (wsProvider && origin === wsProvider) {
+        return;
+      }
+
       setSaveStatus("unsaved");
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
       saveTimeoutRef.current = setTimeout(() => {
-        persistState(doc);
+        persistStateRef.current(doc);
       }, 2500);
     };
 
@@ -185,7 +210,7 @@ export function useYjsDocument({
         clearTimeout(saveTimeoutRef.current);
       }
       // Save before tearing down
-      persistState(doc);
+      persistStateRef.current(doc);
 
       doc.off("update", updateHandler);
       if (wsProvider) {
@@ -195,7 +220,69 @@ export function useYjsDocument({
       setYdoc(null);
       setProvider(null);
     };
-  }, [documentId, initialBase64State, initialTextContent, currentUser, persistState]);
+  }, [documentId]); // Only recreate when switching documents!
+
+  // Dedicated Awareness & Collaborators sync effect (does NOT recreate the Y.Doc or WebsocketProvider)
+  const userColor = useMemo(
+    () => (currentUser?.id ? getRandomColor(currentUser.id) : "#2563eb"),
+    [currentUser?.id],
+  );
+
+  useEffect(() => {
+    if (!provider || !provider.awareness) return;
+
+    if (currentUser) {
+      provider.awareness.setLocalStateField("user", {
+        id: currentUser.id,
+        name: currentUser.username,
+        color: userColor,
+        avatarUrl: currentUser.avatarUrl || null,
+      });
+    }
+
+    const updateCollaborators = () => {
+      const states = provider.awareness.getStates();
+      const active: Collaborator[] = [];
+      states.forEach((state, clientId) => {
+        if (state.user) {
+          active.push({
+            clientId,
+            user: state.user,
+          });
+        }
+      });
+
+      setCollaborators((prev) => {
+        if (
+          prev.length === active.length &&
+          prev.every(
+            (p, i) =>
+              p.clientId === active[i]?.clientId &&
+              p.user?.id === active[i]?.user?.id &&
+              p.user?.name === active[i]?.user?.name,
+          )
+        ) {
+          return prev; // Preserve identity to prevent child re-renders
+        }
+        return active;
+      });
+    };
+
+    provider.awareness.on("change", updateCollaborators);
+    updateCollaborators();
+
+    return () => {
+      provider.awareness.off("change", updateCollaborators);
+    };
+  }, [provider, currentUser?.id, currentUser?.username, currentUser?.avatarUrl, userColor]);
+
+  const reconnect = useCallback(() => {
+    if (provider) {
+      setConnectionStatus("connecting");
+      provider.disconnect();
+      provider.connect();
+    }
+  }, [provider]);
 
   return {
     ydoc,
@@ -203,7 +290,7 @@ export function useYjsDocument({
     collaborators,
     saveStatus,
     connectionStatus,
+    reconnect,
     persistNow: () => ydocRef.current && persistState(ydocRef.current),
   };
 }
-

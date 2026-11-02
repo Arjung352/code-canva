@@ -33,10 +33,9 @@ interface ProjectCardProps {
       meetings: number;
     };
   };
-  myRole: string;
 }
 
-export function ProjectCard({ project, myRole }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Card className="group flex flex-col border hover:border-primary/50 transition-colors duration-200">
       <CardHeader className="pb-2">
@@ -46,13 +45,14 @@ export function ProjectCard({ project, myRole }: ProjectCardProps) {
               <Folder className="h-4 w-4" />
             </div>
             <div>
-              <CardTitle className="text-base leading-tight">{project.name}</CardTitle>
-              <p className="text-xs text-muted-foreground font-mono">{project.slug}</p>
+              <CardTitle className="text-base leading-tight">
+                {project.name}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground font-mono">
+                {project.slug}
+              </p>
             </div>
           </div>
-          <Badge variant="secondary" className="shrink-0 text-xs">
-            {myRole.replace("_", " ")}
-          </Badge>
         </div>
         {project.description && (
           <CardDescription className="mt-2 line-clamp-2">
@@ -88,4 +88,3 @@ export function ProjectCard({ project, myRole }: ProjectCardProps) {
     </Card>
   );
 }
-

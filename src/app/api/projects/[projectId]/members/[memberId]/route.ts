@@ -41,7 +41,6 @@ export async function PATCH(
     );
   }
 
-  // Prevent a PROJECT_LEAD from downgrading themselves if they are the only lead
   const targetMember = await prisma.projectMember.findUnique({
     where: { id: memberId },
   });
@@ -50,6 +49,15 @@ export async function PATCH(
     return Response.json({ error: "Member not found" }, { status: 404 });
   }
 
+  // Prevent any user (including PROJECT_LEAD) from changing their own role
+  if (targetMember.userId === userId) {
+    return Response.json(
+      { error: "You cannot change your own role" },
+      { status: 400 },
+    );
+  }
+
+  // Prevent downgrading the only PROJECT_LEAD
   if (targetMember.role === "PROJECT_LEAD" && parsed.data.role !== "PROJECT_LEAD") {
     const leadCount = await prisma.projectMember.count({
       where: { projectId, role: "PROJECT_LEAD" },
@@ -120,4 +128,3 @@ export async function DELETE(
 
   return Response.json({ success: true });
 }
-

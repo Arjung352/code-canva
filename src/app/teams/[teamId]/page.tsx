@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { TailSpin } from "react-loader-spinner";
 import toast, { Toaster } from "react-hot-toast";
-import { Shield, UserPlus, ArrowLeft } from "lucide-react";
+import { Shield, UserPlus, ArrowLeft, LogOut, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Member {
   id: string;
@@ -28,6 +40,7 @@ interface Member {
 
 export default function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>();
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
   const [currentRole, setCurrentRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +48,7 @@ export default function TeamPage() {
   const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER">("MEMBER");
   const [inviteStatus, setInviteStatus] = useState("");
   const [inviting, setInviting] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     async function fetchMembers() {
@@ -58,6 +72,7 @@ export default function TeamPage() {
   }, [teamId]);
 
   const canInvite = currentRole === "OWNER" || currentRole === "ADMIN";
+  const canLeave = currentRole && currentRole !== "OWNER";
 
   const handleInvite = async () => {
     if (!inviteEmail) {
@@ -90,6 +105,30 @@ export default function TeamPage() {
       toast.error("Network error");
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleLeaveTeam = async () => {
+    setIsLeaving(true);
+    try {
+      const res = await fetch(`/api/teams/${teamId}/leave`, {
+        method: "POST",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        toast.error(json.error || "Failed to leave team");
+        setIsLeaving(false);
+        return;
+      }
+
+      toast.success("You have left the team");
+      router.push("/teams");
+      router.refresh();
+    } catch {
+      toast.error("Network error while leaving team");
+      setIsLeaving(false);
     }
   };
 
@@ -130,12 +169,55 @@ export default function TeamPage() {
             </p>
           )}
         </div>
-        <Link
-          href={`/teams/${teamId}/projects`}
-          className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition"
-        >
-          View Projects →
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Leave Team Button (Only for ADMIN and MEMBER, never OWNER) */}
+          {canLeave && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 text-xs h-9 gap-1.5"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Leave Team
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave Team</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to leave this team? You will immediately lose access to all projects, documents, and workspace resources within this team.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isLeaving}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLeaveTeam}
+                    disabled={isLeaving}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isLeaving ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Leaving...
+                      </>
+                    ) : (
+                      "Confirm & Leave"
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          <Link
+            href={`/teams/${teamId}/projects`}
+            className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition"
+          >
+            View Projects →
+          </Link>
+        </div>
       </div>
 
       {/* Members List */}

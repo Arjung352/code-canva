@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { Loader2, Settings, Code2, Video, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ export default function ProjectDashboardPage() {
     teamId: string;
     projectId: string;
   }>();
+  const { user } = useUser();
   const { toast } = useToast();
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [myRole, setMyRole] = useState<ProjectRole | null>(null);
@@ -129,14 +131,14 @@ export default function ProjectDashboardPage() {
             </span>
           </Link>
         </Button>
-        <Button
-          variant="outline"
-          className="h-auto py-4 flex flex-col gap-2"
-          disabled
-        >
-          <Video className="h-6 w-6 text-muted-foreground" />
-          <span className="font-medium">Start Meeting</span>
-          <span className="text-xs text-muted-foreground">Coming in Phase 3</span>
+        <Button asChild variant="outline" className="h-auto py-4 flex flex-col gap-2">
+          <Link href={`/teams/${teamId}/projects/${projectId}/canvas`}>
+            <Video className="h-6 w-6 text-emerald-500" />
+            <span className="font-medium">Video Meeting</span>
+            <span className="text-xs text-muted-foreground">
+              LiveKit audio & video conferencing
+            </span>
+          </Link>
         </Button>
         <Button
           variant="outline"
@@ -168,10 +170,10 @@ export default function ProjectDashboardPage() {
           <ProjectMembersPanel
             projectId={projectId}
             currentUserRole={myRole}
+            currentUserId={user?.id ?? null}
           />
         </CardContent>
       </Card>
     </div>
   );
 }
-

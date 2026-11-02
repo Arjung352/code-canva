@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -10,8 +9,9 @@ import {
   ArrowLeft,
   Loader2,
   FolderOpen,
-  Eye,
   Shield,
+  Video,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,17 +32,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CollaborativeEditor } from "@/components/collaboration/collaborative-editor";
-import { useProjectRole } from "@/hooks/use-project-role";
+import { VideoConferencePanel } from "@/components/meeting/video-conference-panel";
+import { useCanvas } from "@/contexts/canvas-context";
 import { hasProjectPermission } from "@/lib/permissions";
-
-interface DocumentMeta {
-  id: string;
-  name: string;
-  filePath: string;
-  language: string;
-  lastEditedById?: string | null;
-  updatedAt: string;
-}
+import { DEFAULT_SNIPPETS } from "@/lib/code-snippets";
 
 interface ActiveDocumentData {
   id: string;
@@ -54,86 +46,92 @@ interface ActiveDocumentData {
   content?: string;
 }
 
-const DEFAULT_SNIPPETS: Record<string, string> = {
-  javascript: `// CodeCanvas Collaborative Workspace
-console.log("Welcome to CodeCanvas!");
-
-function calculateMetrics(items) {
-  return items.reduce((acc, curr) => acc + curr, 0);
-}
-`,
-  typescript: `// CodeCanvas TypeScript Workspace
-interface Collaborator {
+interface ProjectMeeting {
   id: string;
-  name: string;
-  active: boolean;
+  title: string;
+  roomName: string;
+  status: "SCHEDULED" | "LIVE" | "ENDED" | "CANCELLED";
+  startedById: string;
 }
-
-const team: Collaborator[] = [
-  { id: "1", name: "Alice", active: true },
-];
-
-console.log("Initialized team workspace:", team);
-`,
-  python: `# CodeCanvas Python Workspace
-def greet(name: str) -> str:
-    message = f"Hello from CodeCanvas, {name}!"
-    print(message)
-    return message
-
-greet("Developer")
-`,
-};
 
 export default function ProjectCanvasPage() {
-  const { teamId, projectId } = useParams<{
-    teamId: string;
-    projectId: string;
-  }>();
+  const {
+    teamId,
+    projectId,
+    currentUserRole,
+    isRoleLoading,
+    documents,
+    isLoadingDocs,
+    activeDocId,
+    setActiveDocId,
+    refreshDocuments,
+    setCollaborators,
+    isCreateFileOpen,
+    setIsCreateFileOpen,
+    isMeetingActive,
+    setIsMeetingActive,
+    activeMeetingId,
+    setActiveMeetingId,
+  } = useCanvas();
+
   const { user } = useUser();
-  const { role, isLoading: isRoleLoading } = useProjectRole(projectId);
   const { toast } = useToast();
 
-  const [documents, setDocuments] = useState<DocumentMeta[]>([]);
-  const [activeDocId, setActiveDocId] = useState<string | null>(null);
-  const [activeDocData, setActiveDocData] = useState<ActiveDocumentData | null>(null);
-  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+  const [activeDocData, setActiveDocData] = useState<ActiveDocumentData | null>(
+    null,
+  );
   const [isLoadingActiveDoc, setIsLoadingActiveDoc] = useState(false);
 
-  // New Document Dialog state
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  // New Document Dialog inputs
   const [newFileName, setNewFileName] = useState("");
   const [newFileLang, setNewFileLang] = useState("typescript");
   const [isCreating, setIsCreating] = useState(false);
 
-  const canEdit = role ? hasProjectPermission(role, "EDIT_DOCUMENT") : false;
+  // Live meeting indicator
+  const [liveMeeting, setLiveMeeting] = useState<ProjectMeeting | null>(null);
+  const [isStartingMeeting, setIsStartingMeeting] = useState(false);
 
-  // Fetch documents for this project
-  const fetchDocuments = useCallback(async () => {
+  // Memoize current user to guarantee stable reference across renders
+  const currentUserData = useMemo(() => {
+    if (!user) return null;
+    return {
+      id: user.id,
+      username: user.username || user.firstName || "Collaborator",
+      avatarUrl: user.imageUrl || null,
+    };
+  }, [user?.id, user?.username, user?.firstName, user?.imageUrl]);
+
+  const canEdit = currentUserRole
+    ? hasProjectPermission(currentUserRole, "EDIT_DOCUMENT")
+    : false;
+
+  const canStartMeeting = currentUserRole
+    ? hasProjectPermission(currentUserRole, "START_MEETING")
+    : false;
+
+  // Poll or check for live meeting in this project
+  const checkLiveMeeting = useCallback(async () => {
+    if (!projectId) return;
     try {
-      const res = await fetch(`/api/projects/${projectId}/documents`);
-      if (!res.ok) throw new Error("Failed to load documents");
-      const docs = (await res.json()) as DocumentMeta[];
-      setDocuments(docs);
-
-      if (docs.length > 0 && !activeDocId) {
-        setActiveDocId(docs[0].id);
+      const res = await fetch(`/api/projects/${projectId}/meetings`);
+      if (res.ok) {
+        const meetings = (await res.json()) as ProjectMeeting[];
+        const currentLive = meetings.find((m) => m.status === "LIVE");
+        setLiveMeeting(currentLive || null);
+        if (currentLive) {
+          setActiveMeetingId((prev) => prev || currentLive.id);
+        }
       }
-    } catch (err) {
-      console.error(err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load project documents",
-      });
-    } finally {
-      setIsLoadingDocs(false);
+    } catch {
+      // Silently ignore background polling error
     }
-  }, [projectId, activeDocId, toast]);
+  }, [projectId, setActiveMeetingId]);
 
   useEffect(() => {
-    if (projectId) fetchDocuments();
-  }, [projectId, fetchDocuments]);
+    checkLiveMeeting();
+    const interval = setInterval(checkLiveMeeting, 10000);
+    return () => clearInterval(interval);
+  }, [checkLiveMeeting]);
 
   // Load selected document detail & state
   useEffect(() => {
@@ -178,8 +176,11 @@ export default function ProjectCanvasPage() {
 
     setIsCreating(true);
     try {
-      const filePath = newFileName.startsWith("/") ? newFileName : `/${newFileName}`;
-      const defaultContent = DEFAULT_SNIPPETS[newFileLang] || `// ${newFileName}\n`;
+      const filePath = newFileName.startsWith("/")
+        ? newFileName
+        : `/${newFileName}`;
+      const defaultContent =
+        DEFAULT_SNIPPETS[newFileLang] || `// ${newFileName}\n`;
 
       const res = await fetch(`/api/projects/${projectId}/documents`, {
         method: "POST",
@@ -204,9 +205,9 @@ export default function ProjectCanvasPage() {
       }
 
       toast({ title: `File ${newFileName} created` });
-      setIsCreateOpen(false);
+      setIsCreateFileOpen(false);
       setNewFileName("");
-      setDocuments((prev) => [...prev, json]);
+      await refreshDocuments();
       setActiveDocId(json.id);
     } catch {
       toast({ variant: "destructive", title: "Network error" });
@@ -228,12 +229,12 @@ export default function ProjectCanvasPage() {
               name: "index.ts",
               filePath: "/index.ts",
               language: "typescript",
-              initialContent: DEFAULT_SNIPPETS.typescript,
+              initialContent: DEFAULT_SNIPPETS["typescript"],
             }),
           });
           if (res.ok) {
             const doc = await res.json();
-            setDocuments([doc]);
+            await refreshDocuments();
             setActiveDocId(doc.id);
           }
         } catch (e) {
@@ -244,7 +245,64 @@ export default function ProjectCanvasPage() {
       };
       initDefault();
     }
-  }, [isLoadingDocs, documents.length, canEdit, projectId, isCreating]);
+  }, [
+    isLoadingDocs,
+    documents.length,
+    canEdit,
+    projectId,
+    isCreating,
+    refreshDocuments,
+    setActiveDocId,
+  ]);
+
+  // Video Conference handler: Start or Join
+  const handleToggleMeeting = async () => {
+    if (isMeetingActive) {
+      setIsMeetingActive(false);
+      return;
+    }
+
+    if (liveMeeting) {
+      setActiveMeetingId(liveMeeting.id);
+      setIsMeetingActive(true);
+      return;
+    }
+
+    if (!canStartMeeting) {
+      toast({
+        variant: "destructive",
+        title: "No Active Meeting",
+        description: "Only a Developer or Project Lead can start a new meeting.",
+      });
+      return;
+    }
+
+    setIsStartingMeeting(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/meetings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: "Project Sync" }),
+      });
+      const meeting = await res.json();
+      if (!res.ok) {
+        throw new Error(meeting.error || "Failed to start meeting");
+      }
+      setLiveMeeting(meeting);
+      setActiveMeetingId(meeting.id);
+      setIsMeetingActive(true);
+      toast({ title: "Meeting started" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error starting meeting";
+      toast({
+        variant: "destructive",
+        title: "Could not start meeting",
+        description: msg,
+      });
+    } finally {
+      setIsStartingMeeting(false);
+    }
+  };
 
   if (isLoadingDocs || isRoleLoading) {
     return (
@@ -268,84 +326,122 @@ export default function ProjectCanvasPage() {
           </Link>
           <span className="text-muted-foreground text-xs">/</span>
           <span className="text-xs font-semibold">Collaborative Canvas</span>
-          {role && (
+          {currentUserRole && (
             <Badge variant="outline" className="text-[11px] gap-1 py-0">
               <Shield className="h-3 w-3 text-primary" />
-              {role.replace("_", " ")}
+              {currentUserRole.replace("_", " ")}
             </Badge>
           )}
         </div>
 
-        {/* New File Button (Only if user has EDIT_DOCUMENT permission) */}
-        {canEdit && (
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
-                <Plus className="h-3.5 w-3.5" />
-                New File
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Create Document</DialogTitle>
-                <DialogDescription>
-                  Add a new collaborative file to this project.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-2">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium">File Name</label>
-                  <Input
-                    placeholder="e.g. app.tsx or utils.py"
-                    value={newFileName}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewFileName(val);
-                      if (val.endsWith(".py")) setNewFileLang("python");
-                      else if (val.endsWith(".ts") || val.endsWith(".tsx")) setNewFileLang("typescript");
-                      else if (val.endsWith(".js") || val.endsWith(".jsx")) setNewFileLang("javascript");
-                      else if (val.endsWith(".json")) setNewFileLang("json");
-                      else if (val.endsWith(".html")) setNewFileLang("html");
-                      else if (val.endsWith(".css")) setNewFileLang("css");
-                    }}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium">Language</label>
-                  <Select value={newFileLang} onValueChange={setNewFileLang}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="typescript">TypeScript</SelectItem>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                      <SelectItem value="python">Python</SelectItem>
-                      <SelectItem value="java">Java</SelectItem>
-                      <SelectItem value="json">JSON</SelectItem>
-                      <SelectItem value="html">HTML</SelectItem>
-                      <SelectItem value="css">CSS</SelectItem>
-                      <SelectItem value="plaintext">Plain Text</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  onClick={handleCreateDocument}
-                  disabled={isCreating}
-                  className="w-full mt-2"
-                >
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create File"
-                  )}
-                </Button>
+        {/* Right Action Buttons: Video Meeting & New File */}
+        <div className="flex items-center gap-2">
+          {/* Video Conference Toggle Button */}
+          <Button
+            size="sm"
+            variant={liveMeeting || isMeetingActive ? "default" : "outline"}
+            className={`h-7 text-xs gap-1.5 transition-all ${
+              liveMeeting
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                : ""
+            }`}
+            onClick={handleToggleMeeting}
+            disabled={isStartingMeeting}
+          >
+            {isStartingMeeting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : liveMeeting ? (
+              <Radio className="h-3.5 w-3.5 animate-pulse text-white" />
+            ) : (
+              <Video className="h-3.5 w-3.5 text-primary" />
+            )}
+            <span>
+              {isMeetingActive
+                ? "In Meeting"
+                : liveMeeting
+                ? "Join Live Meeting"
+                : "Start Meeting"}
+            </span>
+          </Button>
+
+          {/* New File Button */}
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs gap-1"
+              onClick={() => setIsCreateFileOpen(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New File
+            </Button>
+          )}
+        </div>
+
+        {/* Create Document Dialog */}
+        <Dialog open={isCreateFileOpen} onOpenChange={setIsCreateFileOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create Document</DialogTitle>
+              <DialogDescription>
+                Add a new collaborative file to this project.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium">File Name</label>
+                <Input
+                  placeholder="e.g. app.tsx, utils.py, styles.css"
+                  value={newFileName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNewFileName(val);
+                    if (val.endsWith(".py")) setNewFileLang("python");
+                    else if (val.endsWith(".ts") || val.endsWith(".tsx"))
+                      setNewFileLang("typescript");
+                    else if (val.endsWith(".js") || val.endsWith(".jsx"))
+                      setNewFileLang("javascript");
+                    else if (val.endsWith(".json")) setNewFileLang("json");
+                    else if (val.endsWith(".html")) setNewFileLang("html");
+                    else if (val.endsWith(".css")) setNewFileLang("css");
+                  }}
+                />
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium">Language</label>
+                <Select value={newFileLang} onValueChange={setNewFileLang}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="css">CSS</SelectItem>
+                    <SelectItem value="plaintext">Plain Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                onClick={handleCreateDocument}
+                disabled={isCreating}
+                className="w-full mt-2"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create File"
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Document File Tabs */}
@@ -387,15 +483,8 @@ export default function ProjectCanvasPage() {
             initialBase64State={activeDocData.ydocState}
             initialContent={activeDocData.content}
             canEdit={canEdit}
-            currentUser={
-              user
-                ? {
-                    id: user.id,
-                    username: user.username || user.firstName || "Collaborator",
-                    avatarUrl: user.imageUrl,
-                  }
-                : null
-            }
+            currentUser={currentUserData}
+            onCollaboratorsChange={setCollaborators}
           />
         ) : (
           <div className="h-full flex flex-col items-center justify-center border rounded-xl bg-card p-6 text-center">
@@ -403,12 +492,26 @@ export default function ProjectCanvasPage() {
             <h3 className="text-base font-semibold">No Documents Found</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm">
               {canEdit
-                ? "Create a new file using the button above to begin collaborative editing."
+                ? "Create a new file using the button above or sidebar to begin collaborative editing."
                 : "This project has no documents yet. A developer or project lead can create one."}
             </p>
           </div>
         )}
       </div>
+
+      {/* Independent Video Conference Panel (Phase 3) */}
+      {isMeetingActive && activeMeetingId && (
+        <VideoConferencePanel
+          projectId={projectId}
+          meetingId={activeMeetingId}
+          currentUserRole={currentUserRole}
+          isHost={liveMeeting?.startedById === user?.id}
+          onClose={() => {
+            setIsMeetingActive(false);
+            checkLiveMeeting();
+          }}
+        />
+      )}
     </div>
   );
 }

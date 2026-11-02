@@ -48,7 +48,7 @@ export default function TeamProjectsPage() {
         const res = await fetch(`/api/teams/${teamId}/projects`);
         if (!res.ok) throw new Error("Failed to fetch projects");
         const data = await res.json();
-
+        console.log(data);
         if (data.projects) {
           setProjects(data.projects);
           setCurrentRole(data.currentRole ?? null);
@@ -120,7 +120,7 @@ export default function TeamProjectsPage() {
       {projects.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} myRole={p.myRole ?? "VIEWER"} />
+            <ProjectCard key={p.id} project={p} />
           ))}
         </div>
       ) : (
@@ -134,7 +134,9 @@ export default function TeamProjectsPage() {
           </p>
           {canCreateProject && (
             <Button asChild>
-              <Link href={`/teams/${teamId}/projects/new`}>Create a Project</Link>
+              <Link href={`/teams/${teamId}/projects/new`}>
+                Create a Project
+              </Link>
             </Button>
           )}
         </div>

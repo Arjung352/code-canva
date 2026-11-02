@@ -11,8 +11,8 @@ import {
   Users,
   Folder,
   Trash,
+  LogOut,
 } from "lucide-react";
-
 
 interface TeamMembership {
   id: string;
