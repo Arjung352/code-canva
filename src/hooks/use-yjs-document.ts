@@ -154,11 +154,19 @@ export function useYjsDocument({
     }
 
     // Determine WebSocket server URL from environment or current hostname
-    const wsUrl =
-      process.env.NEXT_PUBLIC_YJS_WEBSOCKET_URL ||
-      (typeof window !== "undefined"
-        ? `ws://${window.location.hostname || "localhost"}:1234`
-        : "ws://localhost:1234");
+    let wsUrl = process.env.NEXT_PUBLIC_YJS_WEBSOCKET_URL;
+    if (!wsUrl && typeof window !== "undefined") {
+      const isSecure = window.location.protocol === "https:";
+      const protocol = isSecure ? "wss:" : "ws:";
+      wsUrl = `${protocol}//${window.location.hostname || "localhost"}:1234`;
+    } else if (!wsUrl) {
+      wsUrl = "ws://localhost:1234";
+    }
+
+    // Guard against Mixed Content: in production HTTPS, upgrade ws:// to wss://
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && wsUrl.startsWith("ws://")) {
+      wsUrl = wsUrl.replace(/^ws:\/\//i, "wss://");
+    }
 
     const roomName = `doc-${documentId}`;
     let wsProvider: WebsocketProvider | null = null;

@@ -1,3 +1,4 @@
+import http from "node:http";
 import { WebSocketServer, WebSocket } from "ws";
 import * as Y from "yjs";
 import * as syncProtocol from "y-protocols/sync";
@@ -5,7 +6,8 @@ import * as awarenessProtocol from "y-protocols/awareness";
 import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
 
-const PORT = parseInt(process.env.YJS_PORT || "1234", 10);
+const PORT = parseInt(process.env.PORT || process.env.YJS_PORT || "1234", 10);
+const HOST = process.env.HOST || "0.0.0.0";
 
 const messageSync = 0;
 const messageAwareness = 1;
@@ -114,7 +116,17 @@ function closeConn(doc: WSSharedDoc, conn: WebSocket) {
   } catch (e) {}
 }
 
-const wss = new WebSocketServer({ port: PORT });
+const server = http.createServer((req, res) => {
+  if (req.url === "/health" || req.url === "/") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok", service: "codecanvas-yjs-server", activeDocs: docs.size }));
+    return;
+  }
+  res.writeHead(404, { "Content-Type": "text/plain" });
+  res.end("Not Found");
+});
+
+const wss = new WebSocketServer({ server });
 
 wss.on("connection", (conn: WebSocket, req) => {
   conn.binaryType = "nodebuffer";
@@ -184,5 +196,21 @@ wss.on("connection", (conn: WebSocket, req) => {
   });
 });
 
-console.log(`[Yjs Server] Collaborative WebSocket server running on ws://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`[Yjs Server] Collaborative WebSocket server running on ${HOST}:${PORT}`);
+  console.log(`[Yjs Server] Health check available at http://${HOST}:${PORT}/health`);
+});
+
+function handleShutdown(signal: string) {
+  console.log(`[Yjs Server] Received ${signal}. Closing active connections...`);
+  wss.close(() => {
+    server.close(() => {
+      console.log("[Yjs Server] Shutdown complete.");
+      process.exit(0);
+    });
+  });
+}
+
+process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+process.on("SIGINT", () => handleShutdown("SIGINT"));
 

@@ -13,7 +13,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "yjs:dev": "tsx yjs-server/server.ts"
+    "yjs:dev": "tsx yjs-server/server.ts",
+    "yjs:start": "tsx yjs-server/server.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.8",
